@@ -1,0 +1,311 @@
+/* ==============================================================================
+   MAKAURA BEAUTY MARKETPLACE - GLOBAL DESIGN SYSTEM
+   Haute Beauté Luxury Aesthetic:
+   Opulent Royal Bordeaux Wine (#6B1D3D / #4E1026),
+   Metallic Champagne Gold (#C5A880 / #B89355 / #D4AF37),
+   Velvet Noir (#111111 / #161616), Soft Alabaster Silk (#FAF8F5 / #F6F1EA),
+   Pill Radii, Smooth Micro-Animations, and High-End Editorial Layouts.
+   ============================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Haute Beauté Luxury Palette */
+  --bg-primary: #FFFFFF;              /* Pure Crisp White */
+  --bg-secondary: #FAF8F5;            /* Soft Alabaster Silk Neutral */
+  --bg-tertiary: #FAF5EE;             /* Warm Champagne Cream Tint */
+  --bg-card: #FFFFFF;
+  --bg-dark: #111111;                 /* Velvet Noir */
+  --bg-dark-surface: #18181B;         /* Deep Warm Charcoal Surface */
+  --bg-cream: #FAF8F5;                /* Warm Alabaster Silk */
+  --bg-cream-alt: #F6F1EA;            /* Soft Linen Neutral */
+
+  /* Haute Beauté Wine & Champagne Gold Accents */
+  --luxe-wine: #6B1D3D;               /* Royal Bordeaux Wine */
+  --luxe-wine-dark: #4E1026;
+  --luxe-wine-hover: #54152F;
+  --luxe-wine-light: #FBF0F4;
+  --luxe-wine-glow: rgba(107, 29, 61, 0.28);
+
+  --luxe-gold: #C5A880;               /* Metallic Champagne Gold */
+  --luxe-gold-hover: #B89355;
+  --luxe-gold-light: #FAF6EF;
+  --luxe-gold-border: #E8D8C0;
+  --luxe-gold-glow: rgba(197, 168, 128, 0.35);
+
+  /* Legacy Aliases (mapped directly to Haute Beauté luxury tokens) */
+  --elf-blue: #6B1D3D;
+  --elf-blue-hover: #54152F;
+  --elf-blue-dark: #4E1026;
+  --elf-blue-light: #FBF0F4;
+  --elf-blue-glow: rgba(107, 29, 61, 0.28);
+  --elf-cyan: #C5A880;
+
+  /* Neutral Dark / Blacks */
+  --color-black: #111111;
+  --color-charcoal: #1C1917;
+  --color-slate: #3F3F46;
+  --color-muted: #71717A;
+  --color-light-gray: #A1A1AA;
+
+  /* Typography Colors */
+  --text-primary: #18181B;            /* Deep Warm Velvet Charcoal */
+  --text-secondary: #52525B;          /* Refined Body Neutral */
+  --text-muted: #71717A;              /* Meta Text */
+  --text-inverse: #FFFFFF;
+  --text-wine: #6B1D3D;
+  --text-gold: #B89355;
+
+  /* Hairline Borders */
+  --border-light: #E7E5E4;
+  --border-subtle: #D6D3D1;
+  --border-wine: rgba(107, 29, 61, 0.22);
+  --border-gold: rgba(197, 168, 128, 0.35);
+  --border-strong: #18181B;
+
+  /* Flat Minimalist Luxury Design (Zero Box Shadows) */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-hover: none;
+  --shadow-wine-glow: none;
+  --shadow-gold-glow: none;
+  --shadow-blue-glow: none;
+
+  /* Modern Border Radii (Mature & Soft) */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 9999px;
+
+  /* Fonts */
+  --font-sans: 'Plus Jakarta Sans', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Transitions */
+  --transition-smooth: all 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-spring: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Base Resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Layout Container */
+.container {
+  width: 100%;
+  max-width: 1360px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* Modern Pill Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 14px 28px;
+  border-radius: var(--radius-pill);
+  transition: var(--transition-smooth);
+}
+
+.btn-primary {
+  background-color: #111111;
+  color: #FFFFFF;
+  border: 1px solid #111111;
+  box-shadow: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--luxe-wine);
+  border-color: var(--luxe-wine);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: none;
+}
+
+.btn-blue, .btn-wine {
+  background-color: var(--luxe-wine);
+  color: #FFFFFF;
+  border: 1px solid var(--luxe-wine);
+  box-shadow: none;
+}
+
+.btn-blue:hover, .btn-wine:hover {
+  background-color: var(--luxe-wine-hover);
+  border-color: var(--luxe-wine-hover);
+  transform: translateY(-1px);
+  box-shadow: none;
+}
+
+.btn-gold {
+  background-color: var(--luxe-gold);
+  color: #111111;
+  border: 1px solid var(--luxe-gold);
+  box-shadow: none;
+}
+
+.btn-gold:hover {
+  background-color: var(--luxe-gold-hover);
+  border-color: var(--luxe-gold-hover);
+  transform: translateY(-1px);
+  box-shadow: none;
+}
+
+.btn-outline {
+  border: 1.5px solid #18181B;
+  background: #FFFFFF;
+  color: #18181B;
+}
+
+.btn-outline:hover {
+  background: #111111;
+  color: #FFFFFF;
+  border-color: #111111;
+  transform: translateY(-1px);
+}
+
+.btn-white {
+  background: #FFFFFF;
+  color: #111111;
+  border: 1px solid #E7E5E4;
+  box-shadow: none;
+}
+
+.btn-white:hover {
+  background: var(--luxe-wine);
+  color: #FFFFFF;
+  border-color: var(--luxe-wine);
+  transform: translateY(-1px);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+}
+
+.badge-blue, .badge-wine {
+  background-color: var(--luxe-wine);
+  color: #FFFFFF;
+}
+
+.badge-black {
+  background-color: #111111;
+  color: #FFFFFF;
+}
+
+.badge-gold {
+  background-color: var(--luxe-gold-light);
+  color: var(--luxe-gold-hover);
+  border: 1px solid var(--luxe-gold-border);
+}
+
+.badge-blue-light {
+  background-color: var(--luxe-wine-light);
+  color: var(--luxe-wine);
+  border: 1px solid #F1D3DF;
+}
+
+/* Animations */
+@keyframes floatSoft {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.pulse-blue, .pulse-wine {
+  animation: pulseGlow 2.5s infinite;
+}
+
+.floating-element {
+  animation: floatSoft 4.5s ease-in-out infinite;
+}
+
+/* Section Kicker */
+.section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--luxe-wine);
+  background-color: var(--luxe-wine-light);
+  border: 1px solid #F1D3DF;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 12px;
+}

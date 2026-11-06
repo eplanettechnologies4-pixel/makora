@@ -1,0 +1,259 @@
+.drawerOverlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(18, 16, 14, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.overlayOpen {
+  opacity: 1;
+  visibility: visible;
+}
+
+.drawerPanel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 420px;
+  max-width: 90vw;
+  background-color: #FAF8F5;
+  border-right: 1px solid var(--border-light);
+  box-shadow: none;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  overflow-y: auto;
+}
+
+.panelOpen {
+  transform: translateX(0);
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.drawerTitle {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drawerSubtitle {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-gold-hover);
+  display: block;
+}
+
+.closeBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #FAF8F5;
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background-color: var(--text-primary);
+  color: #FFFFFF;
+  transform: rotate(90deg);
+}
+
+.drawerBody {
+  flex-grow: 1;
+  padding: 20px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.departmentGroup {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.departmentGroup:hover {
+  border-color: var(--accent-gold);
+}
+
+.groupToggle {
+  width: 100%;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.groupToggle:hover {
+  background-color: #FDFBF7;
+}
+
+.groupName {
+  font-family: var(--font-serif);
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.groupIcon {
+  color: var(--accent-gold-hover);
+  transition: transform 0.25s ease;
+}
+
+.groupIconRotated {
+  transform: rotate(180deg);
+}
+
+.subcategoriesList {
+  list-style: none;
+  padding: 0 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px dashed var(--border-light);
+  padding-top: 14px;
+  background-color: #FDFBF7;
+}
+
+.subLink {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  transition: all 0.2s ease;
+}
+
+.subLink:hover {
+  color: var(--accent-gold-hover);
+  padding-left: 6px;
+}
+
+.viewAllSub {
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--accent-gold-hover);
+  margin-top: 6px;
+  display: inline-block;
+}
+
+/* Quick Brands Strip inside Drawer */
+.brandsStrip {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+}
+
+.brandsStripTitle {
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.brandsChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.brandChip {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  background-color: #FAF8F5;
+  border: 1px solid var(--border-light);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  transition: all 0.2s ease;
+}
+
+.brandChip:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold-hover);
+  background-color: #FFFFFF;
+}
+
+.drawerFooter {
+  padding: 20px 24px;
+  background-color: #FFFFFF;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.codNoticeStrip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.sellerCtaBtn {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--text-primary);
+  color: #FFFFFF;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  text-align: center;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease;
+}
+
+.sellerCtaBtn:hover {
+  background-color: var(--accent-gold-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawerOverlay, .drawerPanel, .closeBtn, .groupIcon {
+    transition: none !important;
+  }
+}
+

@@ -1,0 +1,144 @@
+.section {
+  padding: 84px 0 92px;
+  background-color: var(--bg-dark);
+  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+}
+
+.backgroundGlow {
+  position: absolute;
+  top: 0;
+  right: 15%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(197, 168, 128, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.inner {
+  max-width: 680px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.heading {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  color: #FFFFFF;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.headingItalic {
+  font-style: italic;
+  color: var(--accent-gold);
+}
+
+.description {
+  font-size: 1.05rem;
+  color: #C7C0B8;
+  line-height: 1.65;
+  margin-bottom: 36px;
+  font-weight: 300;
+}
+
+.form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 520px;
+  margin: 0 auto 20px;
+}
+
+.input {
+  flex-grow: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(197, 168, 128, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 14px 20px;
+  font-size: 0.92rem;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.input:focus {
+  border-color: var(--accent-gold);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.submitBtn {
+  background: var(--accent-gold);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.submitBtn:hover {
+  background: #D8BA92;
+  transform: translateY(-2px);
+}
+
+.privacyNote {
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.02em;
+}
+
+.successMessage {
+  padding: 14px 20px;
+  background: rgba(197, 168, 128, 0.15);
+  border: 1px solid var(--accent-gold);
+  border-radius: var(--radius-sm);
+  color: var(--accent-gold);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+  .section {
+    padding: 60px 0;
+  }
+  .heading {
+    font-size: 2.25rem;
+  }
+  .form {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .submitBtn {
+    width: 100%;
+  }
+}
+

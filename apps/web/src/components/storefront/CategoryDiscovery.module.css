@@ -1,0 +1,174 @@
+.section {
+  padding: 36px 0 56px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+/* 1. Section Header: e.l.f. Midnight Blue-Black Title & Circular Nav */
+.headerRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 34px;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.heading {
+  font-family: var(--font-sans);
+  font-size: 1.95rem;
+  font-weight: 900;
+  color: #060911;
+  /* e.l.f. Midnight Blue-Black */
+  letter-spacing: -0.03em;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.blueDot {
+  color: #6B1D3D;
+}
+
+.subHeading {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748B;
+  margin-top: 6px;
+}
+
+/* 2. Responsive 14 Categories Grid (No Carousel, No Chevrons, No Box Shadows) */
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 32px 16px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+/* 3. Circular Category Item Card */
+.categoryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.circleAvatar {
+  position: relative;
+  width: 136px;
+  height: 136px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #FAF8F5;
+  border: 1.5px solid #E7E5E4;
+  box-shadow: none;
+  transition: all 0.25s ease;
+}
+
+.categoryItem:hover .circleAvatar {
+  transform: translateY(-4px);
+  border-color: #C5A880;
+  box-shadow: none;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.categoryItem:hover .avatarImg {
+  transform: scale(1.06);
+}
+
+.categoryLabel {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin-top: 12px;
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease;
+}
+
+.categoryItem:hover .categoryLabel {
+  color: #6B1D3D;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1240px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 26px 14px;
+  }
+}
+
+@media (max-width: 820px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px 12px;
+  }
+  .circleAvatar {
+    width: 110px;
+    height: 110px;
+  }
+  .categoryLabel {
+    font-size: 0.82rem;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 520px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 10px;
+  }
+  .circleAvatar {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 24px 0 36px;
+  }
+
+  .headerRow {
+    margin-bottom: 22px;
+  }
+
+  .heading {
+    font-size: 1.45rem;
+  }
+
+  .circleAvatar {
+    width: 140px;
+    height: 140px;
+  }
+
+  .categoryItem {
+    width: 140px;
+  }
+
+  .categoryRow {
+    grid-template-columns: repeat(7, 140px);
+    gap: 16px;
+  }
+
+  .categoryLabel {
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+
+  .rowsWrapper {
+    gap: 24px;
+  }
+}

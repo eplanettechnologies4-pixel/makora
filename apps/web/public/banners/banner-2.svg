@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 402" width="100%" height="100%">
+  <defs>
+    <!-- Warm Festive Champagne Bokeh Background Gradient -->
+    <linearGradient id="champagneBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDFBF7" />
+      <stop offset="50%" stop-color="#F7EFE2" />
+      <stop offset="100%" stop-color="#EFE3D0" />
+    </linearGradient>
+
+    <!-- 3D Metallic Gold Gradient for Badge & Live Now -->
+    <linearGradient id="goldMetallic" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ECC678" />
+      <stop offset="25%" stop-color="#FCEECB" />
+      <stop offset="50%" stop-color="#D4A346" />
+      <stop offset="75%" stop-color="#F8E5B6" />
+      <stop offset="100%" stop-color="#B88628" />
+    </linearGradient>
+
+    <linearGradient id="goldTextGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF2D6" />
+      <stop offset="35%" stop-color="#E5BC64" />
+      <stop offset="70%" stop-color="#B38022" />
+      <stop offset="100%" stop-color="#845A0E" />
+    </linearGradient>
+
+    <!-- Jewel Gradient for Octagon Center -->
+    <linearGradient id="jewelCenter" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7B1D3A" />
+      <stop offset="50%" stop-color="#551227" />
+      <stop offset="100%" stop-color="#380918" />
+    </linearGradient>
+
+    <filter id="goldDropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#5B3A0D" flood-opacity="0.4" />
+    </filter>
+
+    <filter id="badgeShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+
+    <!-- Soft Blend Mask for Center Models -->
+    <linearGradient id="modelMask2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0" />
+      <stop offset="18%" stop-color="#000000" stop-opacity="1" />
+      <stop offset="82%" stop-color="#000000" stop-opacity="1" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </linearGradient>
+    <mask id="modelBlend2">
+      <rect x="0" y="0" width="1024" height="402" fill="url(#modelMask2)" />
+    </mask>
+  </defs>
+
+  <!-- 1. Background Champagne Canvas -->
+  <rect width="1024" height="402" fill="url(#champagneBg)" />
+
+  <!-- Bokeh Sparkle Circles -->
+  <circle cx="280" cy="80" r="45" fill="#FFFFFF" fill-opacity="0.45" filter="blur(8px)" />
+  <circle cx="480" cy="50" r="60" fill="#FFFFFF" fill-opacity="0.5" filter="blur(12px)" />
+  <circle cx="720" cy="90" r="50" fill="#FFFFFF" fill-opacity="0.4" filter="blur(10px)" />
+  <circle cx="160" cy="140" r="30" fill="#FFF2D6" fill-opacity="0.6" filter="blur(6px)" />
+  <circle cx="340" cy="120" r="22" fill="#FFF9EB" fill-opacity="0.7" filter="blur(4px)" />
+  <circle cx="620" cy="70" r="35" fill="#FFFFFF" fill-opacity="0.55" filter="blur(7px)" />
+
+  <!-- Golden Stars / Sparkles -->
+  <g fill="#ECC678" opacity="0.8">
+    <path d="M 240 60 Q 240 70 230 70 Q 240 70 240 80 Q 240 70 250 70 Q 240 70 240 60 Z" />
+    <path d="M 520 40 Q 520 50 510 50 Q 520 50 520 60 Q 520 50 530 50 Q 520 50 520 40 Z" />
+    <path d="M 780 75 Q 780 85 770 85 Q 780 85 780 95 Q 780 85 790 85 Q 780 85 780 75 Z" />
+    <path d="M 400 95 Q 400 102 393 102 Q 400 102 400 109 Q 400 102 407 102 Q 400 102 400 95 Z" />
+  </g>
+
+  <!-- 2. Center Editorial Beauty Models (Masked Seamlessly) -->
+  <g mask="url(#modelBlend2)">
+    <image 
+      href="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&amp;fit=crop&amp;w=900&amp;q=90" 
+      x="270" 
+      y="-10" 
+      width="480" 
+      height="370" 
+      preserveAspectRatio="xMidYMid slice" 
+    />
+  </g>
+
+  <!-- 3. Left Octagonal Jewel Badge with Double Gold Rim (Exact 11.11 Layout) -->
+  <g transform="translate(68, 38)" filter="url(#badgeShadow)">
+    <!-- Outer Gold Octagon -->
+    <polygon points="46,0 124,0 170,46 170,124 124,170 46,170 0,124 0,46" fill="url(#goldMetallic)" />
+    
+    <!-- Inner Dark Groove -->
+    <polygon points="48,4 122,4 166,48 166,122 122,166 48,166 4,122 4,48" fill="#380918" />
+
+    <!-- Inner Gold Bevel Ring -->
+    <polygon points="50,7 120,7 163,50 163,120 120,163 50,163 7,120 7,50" fill="url(#goldMetallic)" />
+
+    <!-- Jewel Center Core -->
+    <polygon points="52,10 118,10 160,52 160,118 118,160 52,160 10,118 10,52" fill="url(#jewelCenter)" />
+
+    <!-- Badge Typography (Gold Serif & Script) -->
+    <text x="85" y="48" font-family="'Times New Roman', Georgia, serif" font-size="34" font-weight="900" fill="url(#goldMetallic)" text-anchor="middle" letter-spacing="1">11.11</text>
+    <text x="85" y="80" font-family="'Times New Roman', Georgia, serif" font-size="28" font-weight="800" fill="url(#goldMetallic)" text-anchor="middle" letter-spacing="1.5">MEGA</text>
+    <text x="85" y="112" font-family="'Times New Roman', Georgia, serif" font-size="25" font-style="italic" font-weight="700" fill="url(#goldMetallic)" text-anchor="middle">Hydration</text>
+    <text x="85" y="142" font-family="'Times New Roman', Georgia, serif" font-size="26" font-weight="800" fill="url(#goldMetallic)" text-anchor="middle" letter-spacing="1">Days</text>
+  </g>
+
+  <!-- 3D Embossed Gold "LIVE NOW" Text Below Badge -->
+  <g transform="translate(68, 238)">
+    <!-- Dark Gold 3D Drop Extrusion -->
+    <text x="0" y="38" font-family="'Times New Roman', Georgia, serif" font-size="38" font-weight="900" fill="#583B0E" letter-spacing="2">LIVE NOW</text>
+    <!-- Front Face Metallic Gold -->
+    <text x="-2" y="36" font-family="'Times New Roman', Georgia, serif" font-size="38" font-weight="900" fill="url(#goldTextGrad)" letter-spacing="2" filter="url(#goldDropShadow)">LIVE NOW</text>
+
+    <!-- Subtitle Date -->
+    <text x="2" y="58" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="900" fill="#6B1832" letter-spacing="1.2">STARTING FROM 6TH NOVEMBER</text>
+  </g>
+
+  <!-- 4. Right Side Massive UPTO 70% OFF Typography -->
+  <g transform="translate(760, 65)">
+    <!-- "UPTO" -->
+    <text x="50" y="46" font-family="'Times New Roman', Georgia, serif" font-size="34" font-weight="900" fill="#5E0F2B" letter-spacing="2">UPTO</text>
+
+    <!-- Massive "70%" -->
+    <text x="0" y="148" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="108" font-weight="950" fill="#5E0F2B" letter-spacing="-6">70</text>
+    <text x="126" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="950" fill="#5E0F2B">%</text>
+    <text x="126" y="142" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="900" fill="#5E0F2B">OFF</text>
+
+    <!-- Subtitle: Free Shipping Nationwide -->
+    <text x="26" y="184" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="800" fill="#5E0F2B">Free Shipping</text>
+    <text x="32" y="206" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="900" fill="#5E0F2B">Nationwide</text>
+  </g>
+
+  <!-- 5. Bottom Unified Sponsor Ribbon -->
+  <g transform="translate(20, 334)">
+    <!-- App Download Pill -->
+    <g transform="translate(10, 8)">
+      <!-- Apple Logo -->
+      <path d="M12 18 C11 18 10 17 9 17 C8 17 7 18 6 18 C4.5 18 3 15 3 12 C3 9 5 8 6.5 8 C7.5 8 8.2 8.6 9 8.6 C9.8 8.6 10.5 8 11.5 8 C12.5 8 13.5 8.5 14 9.5 C12.5 10.5 12.5 12.8 13.8 13.6 C13.2 15 12.5 17 11.5 18 Z M9.5 7.5 C10 6.5 10.8 5.5 10.5 4.5 C9.5 4.5 8.5 5.2 8 6.2 C7.6 7.2 8.5 7.6 9.5 7.5 Z" fill="#0F172A" transform="scale(0.85) translate(0, -2)" />
+      <!-- Play Store Logo -->
+      <polygon points="18,5 28,11 18,17" fill="#0F172A" />
+      <text x="34" y="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="800" fill="#0F172A">Download the App Now</text>
+    </g>
+
+    <!-- Main White Ribbon Container -->
+    <rect x="168" y="0" width="790" height="42" rx="6" fill="#FFFFFF" fill-opacity="0.94" stroke="#E2D7C5" stroke-width="0.8" />
+
+    <!-- "Powered by: HASEENS" Pill -->
+    <rect x="174" y="5" width="160" height="32" rx="4" fill="#6B1D3D" />
+    <text x="184" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="700" fill="#FFFFFF">Powered by:</text>
+    <!-- Lotus Icon -->
+    <path d="M250 25 C248 18 253 14 255 13 C257 14 262 18 260 25 Z" fill="none" stroke="#FEE7A8" stroke-width="1.2" />
+    <path d="M246 25 C243 20 248 16 252 17 C250 21 248 24 246 25 Z" fill="none" stroke="#FEE7A8" stroke-width="1.2" />
+    <path d="M264 25 C267 20 262 16 258 17 C260 21 262 24 264 25 Z" fill="none" stroke="#FEE7A8" stroke-width="1.2" />
+    <text x="270" y="25" font-family="'Times New Roman', Georgia, serif" font-size="12" font-weight="900" fill="#FFFFFF" letter-spacing="1">HASEENS</text>
+
+    <!-- Co-powered by Brand Logos -->
+    <text x="348" y="25" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="800" fill="#1E293B">Co-powered by:</text>
+
+    <!-- Brand 1: LAAJ -->
+    <g transform="translate(426, 12)">
+      <path d="M4 18 C0 10 8 4 12 18" fill="none" stroke="#000000" stroke-width="2.2" stroke-linecap="round" />
+      <path d="M10 18 C8 12 14 8 16 18" fill="none" stroke="#000000" stroke-width="2.2" stroke-linecap="round" />
+      <text x="22" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="950" fill="#000000" letter-spacing="1.5">LAAJ</text>
+    </g>
+
+    <!-- Brand 2: POLAWN -->
+    <g transform="translate(528, 12)">
+      <text x="0" y="15" font-family="'Times New Roman', Georgia, serif" font-size="13" font-weight="900" fill="#000000" letter-spacing="1.5">POLAWN</text>
+    </g>
+
+    <!-- Brand 3: ABAAN ZOHAN -->
+    <g transform="translate(636, 12)">
+      <!-- Leaf icon -->
+      <path d="M4 12 C4 4 12 4 14 12 C14 14 10 14 4 12 Z" fill="#C59B27" />
+      <text x="18" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#000000" letter-spacing="0.5">ABAAN ZOHAN</text>
+    </g>
+
+    <!-- Brand 4: Truba -->
+    <g transform="translate(778, 12)">
+      <text x="0" y="16" font-family="'Brush Script MT', 'Segoe Script', cursive" font-size="16" font-weight="700" fill="#000000">Truba</text>
+    </g>
+
+    <!-- Brand 5: Fresh Birds -->
+    <g transform="translate(860, 10)">
+      <path d="M10 16 C6 14 4 10 8 6 C12 2 16 6 18 10 C16 14 12 16 10 16 Z" fill="#008080" />
+      <circle cx="11" cy="7" r="1.5" fill="#FFFFFF" />
+      <text x="2" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="6.5" font-weight="800" fill="#008080">Fresh Birds</text>
+    </g>
+  </g>
+</svg>
+

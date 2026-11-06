@@ -1,0 +1,74 @@
+services:
+  # ==============================================================================
+  # PostgreSQL Database Service
+  # ==============================================================================
+  postgres:
+    image: postgres:17-alpine
+    container_name: makaura-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-makaura_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-makaura_secure_dev_password_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-makaura_marketplace}
+      TZ: UTC
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-makaura_user} -d ${POSTGRES_DB:-makaura_marketplace}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - makaura-network
+
+  # ==============================================================================
+  # Redis Cache & BullMQ Queue Service
+  # ==============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: makaura-redis
+    restart: unless-stopped
+    command: >
+      sh -c "
+      if [ -n \"$${REDIS_PASSWORD}\" ]; then
+        redis-server --requirepass \"$${REDIS_PASSWORD}\" --appendonly yes;
+      else
+        redis-server --appendonly yes;
+      fi
+      "
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      TZ: UTC
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: >
+        sh -c "
+        if [ -n \"$${REDIS_PASSWORD}\" ]; then
+          redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG;
+        else
+          redis-cli ping | grep PONG;
+        fi
+        "
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - makaura-network
+
+volumes:
+  postgres_data:
+    name: makaura_postgres_data
+  redis_data:
+    name: makaura_redis_data
+
+networks:
+  makaura-network:
+    name: makaura_network
+    driver: bridge

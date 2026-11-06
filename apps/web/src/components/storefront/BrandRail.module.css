@@ -1,0 +1,232 @@
+.section {
+  padding: 64px 0 76px;
+  background-color: #F8FAFC;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.headerRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 36px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.heading {
+  font-family: var(--font-sans);
+  font-size: 2.25rem;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  color: #0F172A;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sellerCtaBtn {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6B1D3D;
+  background-color: #FAF5EE;
+  border: 1.5px solid #E8D8C0;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  transition: all 0.25s ease;
+}
+
+.sellerCtaBtn:hover {
+  background-color: #6B1D3D;
+  border-color: #6B1D3D;
+  color: #FFFFFF;
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+.viewAllBtn {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0F172A;
+  background-color: #FFFFFF;
+  border: 1.5px solid var(--border-light);
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+
+.viewAllBtn:hover {
+  background-color: #000000;
+  border-color: #000000;
+  color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+.brandsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.brandCard {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: none;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.brandCard:hover {
+  border-color: #C5A880;
+  box-shadow: none;
+  transform: translateY(-4px);
+}
+
+.bannerFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background-color: #E2E8F0;
+  overflow: hidden;
+}
+
+.bannerImage {
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.brandCard:hover .bannerImage {
+  transform: scale(1.06);
+}
+
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 35%, rgba(8, 12, 22, 0.7) 100%);
+}
+
+.productCountBadge {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  background: rgba(8, 12, 22, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.brandDetails {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.brandCategory {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #B89355;
+}
+
+.brandOrigin {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94A3B8;
+}
+
+.brandTitle {
+  font-family: var(--font-sans);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.25;
+  margin-bottom: 8px;
+  letter-spacing: -0.015em;
+}
+
+.brandFocus {
+  font-size: 0.84rem;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 22px;
+  flex-grow: 1;
+}
+
+.actionRow {
+  margin-top: auto;
+}
+
+.visitStoreBtn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0F172A;
+  background: #F8FAFC;
+  border: 1.5px solid var(--border-light);
+  padding: 12px;
+  border-radius: var(--radius-pill);
+  transition: all 0.25s ease;
+}
+
+.brandCard:hover .visitStoreBtn {
+  background: #000000;
+  border-color: #000000;
+  color: #FFFFFF;
+}
+
+.visitStoreBtn:hover {
+  background: #6B1D3D !important;
+  border-color: #6B1D3D !important;
+  color: #FFFFFF !important;
+  box-shadow: none;
+}
+
+@media (max-width: 1100px) {
+  .brandsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .heading {
+    font-size: 1.75rem;
+  }
+
+  .brandsGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,141 @@
+.bannerSection {
+  padding: 20px 0 24px;
+  background-color: #FFFFFF;
+  width: 100%;
+}
+
+.bannerCard {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #FAF6EF;
+  transition: border-color 0.3s ease;
+}
+
+.bannerCard:hover {
+  border-color: rgba(107, 29, 61, 0.25);
+}
+
+.bannerLink {
+  display: block;
+  width: 100%;
+  height: auto;
+  text-decoration: none;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.bannerImage {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1024 / 402;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.bannerCard:hover .bannerImage {
+  transform: scale(1.006);
+}
+
+/* Navigation Chevrons */
+.navChevronBtn {
+  position: absolute;
+  top: 48%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #1E293B;
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: none;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.bannerCard:hover .navChevronBtn {
+  opacity: 1;
+}
+
+.navChevronBtn:hover {
+  background: #FFFFFF;
+  color: #6B1D3D;
+  border-color: #6B1D3D;
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: none;
+}
+
+.prevBtn {
+  left: 16px;
+}
+
+.nextBtn {
+  right: 16px;
+}
+
+/* Dot Indicators */
+.dotIndicatorsRow {
+  position: absolute;
+  bottom: 12px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(6px);
+}
+
+.dotBtn {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.22);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+
+.dotActive {
+  width: 22px;
+  background: #6B1D3D;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .bannerSection {
+    padding: 14px 0 18px;
+  }
+  .bannerCard {
+    border-radius: 14px;
+  }
+  .navChevronBtn {
+    width: 32px;
+    height: 32px;
+  }
+  .prevBtn {
+    left: 8px;
+  }
+  .nextBtn {
+    right: 8px;
+  }
+  .dotIndicatorsRow {
+    bottom: 8px;
+    right: 12px;
+    padding: 4px 8px;
+  }
+}

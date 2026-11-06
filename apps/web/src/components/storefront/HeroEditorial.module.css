@@ -1,0 +1,272 @@
+.hero {
+  position: relative;
+  background-color: #FAF6F0;
+  border-bottom: 1px solid var(--border-light);
+  overflow: hidden;
+  padding: 60px 0 80px;
+}
+
+.heroBackgroundPattern {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: radial-gradient(circle at 80% 20%, rgba(197, 168, 128, 0.12) 0%, transparent 50%),
+                    radial-gradient(circle at 20% 80%, rgba(217, 136, 128, 0.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 56px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.content {
+  max-width: 620px;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-gold-hover);
+  font-weight: 600;
+  margin-bottom: 20px;
+  padding: 6px 14px;
+  background: rgba(197, 168, 128, 0.12);
+  border: 1px solid rgba(197, 168, 128, 0.3);
+  border-radius: var(--radius-full);
+}
+
+.kickerDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent-gold-hover);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 3.75rem;
+  line-height: 1.08;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.titleItalic {
+  font-style: italic;
+  font-weight: 400;
+  color: #8C6D45;
+}
+
+.description {
+  font-size: 1.1rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin-bottom: 36px;
+  font-weight: 300;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--text-primary);
+  color: #FFFFFF;
+  padding: 16px 36px;
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-smooth);
+}
+
+.btnPrimary:hover {
+  background-color: var(--accent-gold-hover);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: none;
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: transparent;
+  color: var(--text-primary);
+  padding: 15px 32px;
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: var(--transition-smooth);
+}
+
+.btnSecondary:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold-hover);
+  background-color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+.proofBar {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border-light);
+}
+
+.proofItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.proofValue {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.proofLabel {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Visual Side */
+.visualWrapper {
+  position: relative;
+}
+
+.imageFrame {
+  position: relative;
+  width: 100%;
+  height: 540px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: none;
+  border: 1px solid var(--border-light);
+}
+
+.heroImage {
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.imageFrame:hover .heroImage {
+  transform: scale(1.03);
+}
+
+.floatingCard {
+  position: absolute;
+  bottom: -24px;
+  left: -28px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  padding: 18px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(235, 229, 220, 0.8);
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 320px;
+}
+
+.floatingIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #FAF6F0;
+  border: 1px solid rgba(197, 168, 128, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-gold-hover);
+  flex-shrink: 0;
+}
+
+.floatingTitle {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.floatingSub {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .title {
+    font-size: 3rem;
+  }
+  .imageFrame {
+    height: 420px;
+  }
+  .floatingCard {
+    bottom: 12px;
+    left: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 36px 0 54px;
+  }
+  .title {
+    font-size: 2.35rem;
+  }
+  .description {
+    font-size: 0.98rem;
+  }
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .btnPrimary, .btnSecondary {
+    justify-content: center;
+    width: 100%;
+  }
+  .imageFrame {
+    height: 320px;
+  }
+  .proofBar {
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+}
+

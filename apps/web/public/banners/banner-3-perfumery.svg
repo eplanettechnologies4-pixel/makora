@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 460" width="100%" height="100%">
+  <defs>
+    <!-- Background Midnight Blue Gradient -->
+    <linearGradient id="bgGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#03060E" />
+      <stop offset="45%" stop-color="#070E20" />
+      <stop offset="100%" stop-color="#02040A" />
+    </linearGradient>
+
+    <!-- Headline Gradient -->
+    <linearGradient id="textBlueGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#60A5FA" />
+      <stop offset="60%" stop-color="#0052FF" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+
+    <!-- Button Gradient -->
+    <linearGradient id="btnGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0052FF" />
+      <stop offset="100%" stop-color="#0035A8" />
+    </linearGradient>
+
+    <!-- Image Mask Gradient -->
+    <linearGradient id="imgMaskGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0" />
+      <stop offset="25%" stop-color="#000000" stop-opacity="0.3" />
+      <stop offset="65%" stop-color="#000000" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="1" />
+    </linearGradient>
+    <mask id="modelBlendMask3">
+      <rect x="0" y="0" width="1320" height="460" fill="url(#imgMaskGrad3)" />
+    </mask>
+
+    <radialGradient id="electricRadial3" cx="25%" cy="35%" r="50%">
+      <stop offset="0%" stop-color="#0052FF" stop-opacity="0.32" />
+      <stop offset="60%" stop-color="#0052FF" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="#0052FF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- 1. Deep Midnight Base -->
+  <rect width="1320" height="460" fill="url(#bgGrad3)" />
+
+  <!-- 2. Electric Blue Atmospheric Glow -->
+  <rect width="1320" height="460" fill="url(#electricRadial3)" />
+
+  <!-- 3. Embedded High-Res Luxury Perfume Flacon (Masked on Left) -->
+  <g mask="url(#modelBlendMask3)">
+    <image 
+      href="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&amp;fit=crop&amp;w=1200&amp;q=90" 
+      x="560" 
+      y="-40" 
+      width="780" 
+      height="540" 
+      preserveAspectRatio="xMidYMid slice" 
+    />
+  </g>
+
+  <rect x="0" y="0" width="1320" height="460" fill="url(#bgGrad3)" opacity="0.3" />
+
+  <!-- 4. Left Brand Header & Built-in Copy -->
+  <rect x="64" y="44" width="290" height="28" rx="14" fill="#0052FF" fill-opacity="0.16" stroke="#0052FF" stroke-opacity="0.5" stroke-width="1.2" />
+  <circle cx="80" cy="58" r="4" fill="#0052FF" />
+  <text x="94" y="62" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#60A5FA" letter-spacing="1.5">NICHE PERFUMERY &amp; ARTISANAL ATTARS</text>
+
+  <!-- Headline -->
+  <text x="64" y="126" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="42" font-weight="950" fill="#FFFFFF" letter-spacing="-0.5">DAMASCENA ROSE.</text>
+  <text x="64" y="174" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="42" font-weight="950" fill="url(#textBlueGrad3)" letter-spacing="-0.5">RARE CAMBODIAN OUD.</text>
+
+  <!-- Subtitle -->
+  <text x="64" y="214" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="400" fill="#94A3B8">
+    Copper-distilled damask roses, smoky aged agarwood, and high-concentration extraits.
+  </text>
+  <text x="64" y="236" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="500" fill="#CBD5E1">
+    Formulated by traditional perfume houses without harsh denatured alcohols.
+  </text>
+
+  <!-- Big Offer Pill Callout -->
+  <rect x="64" y="266" width="310" height="42" rx="21" fill="#0A142F" stroke="#0052FF" stroke-width="1.5" />
+  <text x="82" y="293" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="17" font-weight="900" fill="#FFFFFF" letter-spacing="0.5">BUY 1 GET 1 DISCOVERY VIAL</text>
+  <rect x="330" y="277" width="34" height="20" rx="10" fill="#0052FF" />
+  <text x="337" y="291" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="900" fill="#FFFFFF">GIFT</text>
+
+  <!-- Built-in e.l.f. Electric Blue Button -->
+  <g transform="translate(64, 326)">
+    <rect width="250" height="52" rx="26" fill="url(#btnGrad3)" />
+    <text x="30" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="900" fill="#FFFFFF" letter-spacing="1.2">DISCOVER NICHE SCENTS</text>
+    <path d="M210 26 L222 26 M217 20 L223 26 L217 32" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+
+  <!-- Guarantees near button -->
+  <text x="336" y="348" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#60A5FA">✓ 100% Pure Essential Extrait</text>
+  <text x="336" y="368" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#94A3B8">✓ Cash on Delivery (COD) Nationwide</text>
+
+  <!-- 5. Bottom Ribbon -->
+  <rect x="0" y="414" width="1320" height="46" fill="#04060C" fill-opacity="0.9" />
+  <line x1="0" y1="414" x2="1320" y2="414" stroke="#0052FF" stroke-opacity="0.3" stroke-width="1" />
+  
+  <text x="64" y="442" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="900" fill="#0052FF" letter-spacing="1.2">CURATED HOUSES:</text>
+  <text x="206" y="442" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#E2E8F0" letter-spacing="1">
+    INDISENSE RITUALS  •  AMBER &amp; OUD CO.  •  KASHMIRI ROSE EXTRACTORS  •  MAISON DE ROSE
+  </text>
+  <text x="1140" y="442" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#64748B">PURE EXTRAIT</text>
+</svg>
+

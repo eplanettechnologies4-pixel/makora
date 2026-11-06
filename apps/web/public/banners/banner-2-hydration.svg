@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 460" width="100%" height="100%">
+  <defs>
+    <!-- Background Midnight Blue Gradient -->
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040711" />
+      <stop offset="50%" stop-color="#081024" />
+      <stop offset="100%" stop-color="#050813" />
+    </linearGradient>
+
+    <!-- Electric Blue Gradient -->
+    <linearGradient id="elfBlueGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0052FF" />
+      <stop offset="100%" stop-color="#002D96" />
+    </linearGradient>
+
+    <!-- Headline Gradient -->
+    <linearGradient id="textBlueGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="60%" stop-color="#0052FF" />
+      <stop offset="100%" stop-color="#818CF8" />
+    </linearGradient>
+
+    <!-- Button Gradient -->
+    <linearGradient id="btnGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0052FF" />
+      <stop offset="100%" stop-color="#0035A8" />
+    </linearGradient>
+
+    <!-- Image Mask Gradient -->
+    <linearGradient id="imgMaskGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0" />
+      <stop offset="30%" stop-color="#000000" stop-opacity="0.35" />
+      <stop offset="70%" stop-color="#000000" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="1" />
+    </linearGradient>
+    <mask id="modelBlendMask2">
+      <rect x="0" y="0" width="1320" height="460" fill="url(#imgMaskGrad2)" />
+    </mask>
+
+    <radialGradient id="electricRadial2" cx="30%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#0052FF" stop-opacity="0.3" />
+      <stop offset="60%" stop-color="#0052FF" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#0052FF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- 1. Deep Midnight Base -->
+  <rect width="1320" height="460" fill="url(#bgGrad2)" />
+
+  <!-- 2. Electric Blue Radial Glow -->
+  <rect width="1320" height="460" fill="url(#electricRadial2)" />
+
+  <!-- 3. Embedded High-Res Backstage Beauty Model (Masked on Left) -->
+  <g mask="url(#modelBlendMask2)">
+    <image 
+      href="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&amp;fit=crop&amp;w=1200&amp;q=90" 
+      x="540" 
+      y="-30" 
+      width="800" 
+      height="520" 
+      preserveAspectRatio="xMidYMid slice" 
+    />
+  </g>
+
+  <rect x="0" y="0" width="1320" height="460" fill="url(#bgGrad2)" opacity="0.3" />
+
+  <!-- 4. Left Brand Header & Built-in Copy -->
+  <rect x="64" y="44" width="310" height="28" rx="14" fill="#0052FF" fill-opacity="0.16" stroke="#0052FF" stroke-opacity="0.5" stroke-width="1.2" />
+  <circle cx="80" cy="58" r="4" fill="#0052FF" />
+  <text x="94" y="62" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#60A5FA" letter-spacing="1.5">HOLY HYDRATION &amp; VELVET LIP EDIT</text>
+
+  <!-- Headline -->
+  <text x="64" y="126" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="950" fill="#FFFFFF" letter-spacing="-0.5">DEWY SKIN.</text>
+  <text x="64" y="174" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="950" fill="url(#textBlueGrad2)" letter-spacing="-0.5">CELLULAR NECTARS.</text>
+
+  <!-- Subtitle -->
+  <text x="64" y="214" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="400" fill="#94A3B8">
+    Pure Kashmiri saffron elixirs, active peptides, and weightless velvet lip lacquers.
+  </text>
+  <text x="64" y="236" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="500" fill="#CBD5E1">
+    Handcrafted in micro-batches by certified Pakistani formulators.
+  </text>
+
+  <!-- Big Discount Pill Callout -->
+  <rect x="64" y="266" width="230" height="42" rx="21" fill="#0A142F" stroke="#0052FF" stroke-width="1.5" />
+  <text x="82" y="293" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="900" fill="#FFFFFF" letter-spacing="0.5">FLAT 40% OFF</text>
+  <rect x="238" y="277" width="46" height="20" rx="10" fill="#0052FF" />
+  <text x="246" y="291" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="900" fill="#FFFFFF">VIRAL</text>
+
+  <!-- Built-in e.l.f. Electric Blue Button -->
+  <g transform="translate(64, 326)">
+    <rect width="258" height="52" rx="26" fill="url(#btnGrad2)" />
+    <text x="30" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="900" fill="#FFFFFF" letter-spacing="1.2">EXPLORE HYDRATION EDIT</text>
+    <path d="M220 26 L232 26 M227 20 L233 26 L227 32" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+
+  <!-- Guarantees near button -->
+  <text x="344" y="348" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#60A5FA">✓ 100% Halal &amp; Cruelty Free</text>
+  <text x="344" y="368" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#94A3B8">✓ Cash on Delivery (COD) Nationwide</text>
+
+  <!-- 5. Bottom Ribbon -->
+  <rect x="0" y="414" width="1320" height="46" fill="#04060C" fill-opacity="0.9" />
+  <line x1="0" y1="414" x2="1320" y2="414" stroke="#0052FF" stroke-opacity="0.3" stroke-width="1" />
+  
+  <text x="64" y="442" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="900" fill="#0052FF" letter-spacing="1.2">FEATURED HOUSES:</text>
+  <text x="206" y="442" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#E2E8F0" letter-spacing="1">
+    MAISON DE ROSE  •  BOTANICA RAW LABS  •  INDISENSE RITUALS  •  K-GLOW LABS
+  </text>
+  <text x="1130" y="442" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#64748B">BATCH VERIFIED</text>
+</svg>
+

@@ -1,0 +1,44 @@
+{
+  "name": "makaura-beauty-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multi-Vendor Beauty Brand Marketplace Platform (LAAM-inspired luxury beauty ecommerce)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "predev": "npm run build:shared",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"api,web\" -c \"blue,magenta\" \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "build": "npm run build --workspaces",
+    "build:web": "npm run build --workspace=apps/web",
+    "build:api": "npm run build --workspace=apps/api",
+    "build:shared": "npm run build --workspace=packages/shared",
+    "lint": "npm run lint --workspaces",
+    "prisma:generate": "npm run prisma:generate --workspace=apps/api",
+    "prisma:migrate": "npm run prisma:migrate --workspace=apps/api",
+    "prisma:studio": "npm run prisma:studio --workspace=apps/api",
+    "docker:up": "docker compose -f infrastructure/docker-compose.yml up -d",
+    "docker:down": "docker compose -f infrastructure/docker-compose.yml down",
+    "docker:logs": "docker compose -f infrastructure/docker-compose.yml logs -f"
+  },
+  "keywords": [
+    "marketplace",
+    "multi-vendor",
+    "beauty",
+    "cosmetics",
+    "skincare",
+    "nextjs",
+    "nestjs",
+    "prisma",
+    "postgresql",
+    "redis"
+  ],
+  "author": "Makaura Beauty Platform Architect",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

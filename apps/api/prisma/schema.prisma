@@ -1,0 +1,365 @@
+// ==============================================================================
+// MAKAURA BEAUTY BRAND MULTI-VENDOR MARKETPLACE - PRISMA SCHEMA
+// Phase 1 Foundation: Users, Roles, RBAC, Brands, Applications, Banking, Documents
+// ==============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------------------------
+// ENUMS
+// ------------------------------------------------------------------------------
+
+enum UserRoleType {
+  CUSTOMER
+  BRAND_OWNER
+  BRAND_STAFF
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum BrandStatus {
+  DRAFT
+  PENDING_APPROVAL
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  NEEDS_MORE_INFORMATION
+  REQUIRES_INFO
+  SUSPENDED
+}
+
+enum BusinessType {
+  INDIVIDUAL
+  SOLE_PROPRIETORSHIP
+  PARTNERSHIP
+  PRIVATE_LIMITED
+  CORPORATION
+}
+
+enum DocumentType {
+  CNIC_FRONT
+  CNIC_BACK
+  NTN_CERTIFICATE
+  BUSINESS_REGISTRATION
+  CHEQUE_LEAF
+  OTHER
+}
+
+enum BrandMemberRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+// ------------------------------------------------------------------------------
+// USERS & AUTHENTICATION
+// ------------------------------------------------------------------------------
+
+model User {
+  id            String       @id @default(uuid()) @db.Uuid
+  email         String       @unique @db.VarChar(255)
+  passwordHash  String       @db.VarChar(255)
+  firstName     String       @db.VarChar(100)
+  lastName      String       @db.VarChar(100)
+  phone         String?      @db.VarChar(30)
+  role          UserRoleType @default(CUSTOMER)
+  isActive      Boolean      @default(true)
+  emailVerified Boolean      @default(false)
+  hashedRefreshToken String? @db.VarChar(255)
+  lastLoginAt   DateTime?    @db.Timestamptz(6)
+  createdAt     DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime     @updatedAt @db.Timestamptz(6)
+  deletedAt     DateTime?    @db.Timestamptz(6)
+
+  // Relationships
+  profile           UserProfile?
+  addresses         UserAddress[]
+  userRoles         UserRole[]
+  ownedBrands       Brand[]            @relation("BrandOwner")
+  brandMemberships  BrandMember[]
+  submittedApps     BrandApplication[] @relation("Applicant")
+  reviewedApps      BrandApplication[] @relation("Reviewer")
+  approvedBrands    Brand[]            @relation("BrandApprover")
+  auditLogs         AuditLog[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@map("users")
+}
+
+model UserProfile {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @unique @db.Uuid
+  avatarUrl   String?   @db.VarChar(1000)
+  bio         String?   @db.Text
+  dateOfBirth DateTime? @db.Date
+  gender      String?   @db.VarChar(30)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model UserAddress {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @db.Uuid
+  label             String?  @db.VarChar(50) // e.g. "Home", "Office"
+  recipientName     String   @db.VarChar(150)
+  phone             String   @db.VarChar(30)
+  streetAddress     String   @db.VarChar(255)
+  apartment         String?  @db.VarChar(100)
+  city              String   @db.VarChar(100)
+  state             String?  @db.VarChar(100)
+  postalCode        String?  @db.VarChar(20)
+  country           String   @default("Pakistan") @db.VarChar(100)
+  isDefaultShipping Boolean  @default(false)
+  isDefaultBilling  Boolean  @default(false)
+  createdAt         DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_addresses")
+}
+
+// ------------------------------------------------------------------------------
+// ROLES & RBAC PERMISSIONS
+// ------------------------------------------------------------------------------
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(50)
+  description String?  @db.VarChar(255)
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(100) // e.g., "brands:approve", "products:create"
+  module      String   @db.VarChar(50)         // e.g., "brands", "products", "settlements"
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  rolePermissions RolePermission[]
+
+  @@index([module])
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String   @db.Uuid
+  permissionId String   @db.Uuid
+  assignedAt   DateTime @default(now()) @db.Timestamptz(6)
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  userId     String   @db.Uuid
+  roleId     String   @db.Uuid
+  assignedAt DateTime @default(now()) @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+// ------------------------------------------------------------------------------
+// BRANDS & BRAND MANAGEMENT
+// ------------------------------------------------------------------------------
+
+model Brand {
+  id              String       @id @default(uuid()) @db.Uuid
+  name            String       @db.VarChar(150)
+  slug            String       @unique @db.VarChar(180)
+  description     String?      @db.Text
+  story           String?      @db.Text
+  logoUrl         String?      @db.VarChar(1000)
+  bannerUrl       String?      @db.VarChar(1000)
+  status          BrandStatus  @default(PENDING_APPROVAL)
+  businessType    BusinessType @default(SOLE_PROPRIETORSHIP)
+  businessAddress String?      @db.VarChar(255)
+  city            String?      @db.VarChar(100)
+  country         String       @default("Pakistan") @db.VarChar(100)
+  websiteUrl      String?      @db.VarChar(500)
+  socialLinks     Json?
+  businessRegNumber String?    @db.VarChar(100)
+  
+  // Financial & Commission settings for this brand
+  commissionRate  Decimal      @default(10.00) @db.Decimal(5, 2) // Default 10.00%
+  
+  // Ownership & Approval tracking
+  ownerId         String       @db.Uuid
+  approvedAt      DateTime?    @db.Timestamptz(6)
+  approvedById    String?      @db.Uuid
+  rejectionReason String?      @db.Text
+
+  createdAt       DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime     @updatedAt @db.Timestamptz(6)
+  deletedAt       DateTime?    @db.Timestamptz(6)
+
+  // Relationships
+  owner        User               @relation("BrandOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  approvedBy   User?              @relation("BrandApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  members      BrandMember[]
+  applications BrandApplication[]
+  bankAccounts BrandBankAccount[]
+  documents    BrandDocument[]
+  auditLogs    AuditLog[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([ownerId])
+  @@map("brands")
+}
+
+model BrandMember {
+  id         String          @id @default(uuid()) @db.Uuid
+  brandId    String          @db.Uuid
+  userId     String          @db.Uuid
+  role       BrandMemberRole @default(STAFF)
+  isAccepted Boolean         @default(true)
+  createdAt  DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime        @updatedAt @db.Timestamptz(6)
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([brandId, userId])
+  @@index([brandId])
+  @@index([userId])
+  @@map("brand_members")
+}
+
+model BrandApplication {
+  id           String      @id @default(uuid()) @db.Uuid
+  brandId      String      @db.Uuid
+  submittedBy  String      @db.Uuid
+  status                BrandStatus @default(PENDING_APPROVAL)
+  adminNotes            String?     @db.Text
+  rejectionReason       String?     @db.Text
+  additionalInfoRequest String?     @db.Text
+  submittedAt           DateTime?   @db.Timestamptz(6)
+  reviewedById          String?     @db.Uuid
+  reviewedAt            DateTime?   @db.Timestamptz(6)
+  createdAt    DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime    @updatedAt @db.Timestamptz(6)
+
+  brand      Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  applicant  User  @relation("Applicant", fields: [submittedBy], references: [id], onDelete: Restrict)
+  reviewer   User? @relation("Reviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([brandId])
+  @@index([status])
+  @@map("brand_applications")
+}
+
+model BrandBankAccount {
+  id                String    @id @default(uuid()) @db.Uuid
+  brandId           String    @db.Uuid
+  bankName          String    @db.VarChar(150)
+  accountHolderName      String    @db.VarChar(150)
+  accountNumber          String?   @db.VarChar(100)
+  accountNumberEncrypted String?   @db.Text
+  accountNumberMasked    String?   @db.VarChar(50)
+  iban                   String?   @db.VarChar(50)
+  ibanEncrypted          String?   @db.Text
+  ibanMasked             String?   @db.VarChar(50)
+  branchCode             String?   @db.VarChar(50)
+  isVerified        Boolean   @default(false)
+  verifiedAt        DateTime? @db.Timestamptz(6)
+  verifiedById      String?   @db.Uuid
+  createdAt         DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @db.Timestamptz(6)
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("brand_bank_accounts")
+}
+
+model BrandDocument {
+  id              String       @id @default(uuid()) @db.Uuid
+  brandId         String       @db.Uuid
+  documentType    DocumentType
+  fileKey         String       @db.VarChar(500)
+  originalName    String       @db.VarChar(255)
+  mimeType        String       @db.VarChar(100)
+  fileSize        Int          // in bytes
+  isVerified      Boolean      @default(false)
+  verifiedAt      DateTime?    @db.Timestamptz(6)
+  verifiedById    String?      @db.Uuid
+  rejectionReason String?      @db.Text
+  createdAt       DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime     @updatedAt @db.Timestamptz(6)
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@index([documentType])
+  @@map("brand_documents")
+}
+
+// ------------------------------------------------------------------------------
+// AUDIT LOGS & SYSTEM SETTINGS
+// ------------------------------------------------------------------------------
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  brandId   String?  @db.Uuid
+  action    String   @db.VarChar(100) // e.g. "BRAND_APPROVED", "BANK_UPDATED", "SETTLEMENT_RECORDED"
+  entity    String   @db.VarChar(50)  // e.g. "Brand", "Settlement", "Order"
+  entityId  String   @db.VarChar(100)
+  ipAddress String?  @db.VarChar(45)
+  userAgent String?  @db.VarChar(255)
+  metadata  Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  user  User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  brand Brand? @relation(fields: [brandId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([brandId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique @db.VarChar(100)
+  value       String   @db.Text
+  description String?  @db.VarChar(255)
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("system_settings")
+}
