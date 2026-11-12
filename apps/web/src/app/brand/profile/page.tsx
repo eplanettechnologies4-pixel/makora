@@ -4,7 +4,10 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { apiRequest } from '../../../lib/api';
+import {
+  getMyBrandAction,
+  updateMyBrandProfileAction,
+} from '../../../lib/supabase/actions';
 import styles from '../dashboard/dashboard.module.css';
 
 export default function BrandProfilePage() {
@@ -30,9 +33,13 @@ export default function BrandProfilePage() {
         return;
       }
 
-      apiRequest('/brands/me')
+      getMyBrandAction()
         .then((res) => {
-          const b = res.data || res;
+          if (!res.ok) {
+            router.push('/brand/application-status');
+            return;
+          }
+          const b = res.data;
           setBrand(b);
           setFormData({
             description: b.description || '',
@@ -55,10 +62,11 @@ export default function BrandProfilePage() {
     setSaveSuccess(false);
 
     try {
-      await apiRequest('/brands/me', {
-        method: 'PATCH',
-        data: formData,
-      });
+      const res = await updateMyBrandProfileAction(formData);
+      if (!res.ok) {
+        alert(res.error || 'Failed to update brand profile');
+        return;
+      }
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err: any) {

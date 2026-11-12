@@ -1,8 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { apiRequest } from '../lib/api';
 import { AuthUser, UserRole } from '@makaura/shared';
+import {
+  getCurrentUserAction,
+  loginAction,
+  logoutAction,
+} from '../lib/supabase/actions';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -22,10 +26,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = async (): Promise<AuthUser | null> => {
     try {
-      const response = await apiRequest<{ data: AuthUser }>('/auth/me');
-      if (response && response.data) {
-        setUser(response.data);
-        return response.data;
+      const result = await getCurrentUserAction();
+      if (result.ok && result.data) {
+        setUser(result.data);
+        return result.data;
       }
       setUser(null);
       return null;
@@ -44,20 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<AuthUser> => {
     setIsLoading(true);
     try {
-      const response = await apiRequest<{
-        data: { user: AuthUser; accessToken: string };
-      }>('/auth/login', {
-        method: 'POST',
-        data: { email, password },
-      });
-
-      const loggedInUser = response.data.user;
-      if (response.data.accessToken && typeof window !== 'undefined') {
-        sessionStorage.setItem('makaura_access_token', response.data.accessToken);
+      const result = await loginAction({ email, password });
+      if (!result.ok) {
+        throw new Error(result.error);
       }
 
-      setUser(loggedInUser);
-      return loggedInUser;
+      setUser(result.data);
+      return result.data;
     } finally {
       setIsLoading(false);
     }
@@ -65,13 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async (): Promise<void> => {
     try {
-      await apiRequest('/auth/logout', { method: 'POST' });
+      await logoutAction();
     } catch (e) {
       console.warn('Logout notification error', e);
     } finally {
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('makaura_access_token');
-      }
       setUser(null);
     }
   };

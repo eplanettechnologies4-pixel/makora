@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { apiRequest } from '../../../lib/api';
+import { getMyBrandAction } from '../../../lib/supabase/actions';
 import styles from './dashboard.module.css';
 
 export default function BrandDashboardPage() {
@@ -27,9 +27,13 @@ export default function BrandDashboardPage() {
       }
 
       // Load brand profile
-      apiRequest('/brands/me')
+      getMyBrandAction()
         .then((res) => {
-          const brandData = res.data || res;
+          if (!res.ok) {
+            router.push('/brand/application-status');
+            return;
+          }
+          const brandData = res.data;
           // Status gating: If not approved, redirect to application-status
           if (brandData.status !== 'APPROVED') {
             router.push('/brand/application-status');

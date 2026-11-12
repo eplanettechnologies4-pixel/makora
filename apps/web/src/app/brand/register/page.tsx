@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { apiRequest } from '../../../lib/api';
+import { createBrandApplicationAction } from '../../../lib/supabase/actions';
 import styles from './brand-register.module.css';
 
 const STEPS = [
@@ -217,12 +217,14 @@ export default function BrandRegisterPage() {
         payload.ownerPassword = formData.ownerPassword;
       }
 
-      const response = await apiRequest('/brand-applications', {
-        method: 'POST',
-        data: payload,
-      });
+      const result = await createBrandApplicationAction(payload);
 
-      const resData = response.data || response;
+      if (!result.ok) {
+        setErrorMessage(result.error);
+        return;
+      }
+
+      const resData = result.data;
       setSubmittedData({
         referenceNumber: resData.referenceNumber || 'MAK-ONBOARD',
         applicationId: resData.applicationId,

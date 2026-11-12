@@ -4,7 +4,10 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { apiRequest } from '../../../lib/api';
+import {
+  getOwnBrandApplicationAction,
+  resubmitOwnApplicationAction,
+} from '../../../lib/supabase/actions';
 import styles from './status.module.css';
 
 export default function ApplicationStatusPage() {
@@ -22,8 +25,15 @@ export default function ApplicationStatusPage() {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const response = await apiRequest('/brand-applications/me');
-      setApplication(response.data || response);
+      const result = await getOwnBrandApplicationAction();
+      if (!result.ok) {
+        setErrorMessage(
+          result.error || 'No brand application found or you are not logged in.',
+        );
+        setApplication(null);
+      } else {
+        setApplication(result.data);
+      }
     } catch (err: any) {
       setErrorMessage(
         err.message || 'No brand application found or you are not logged in.',
@@ -52,16 +62,14 @@ export default function ApplicationStatusPage() {
 
     setIsSubmitting(true);
     try {
-      // 1. Update with notes
-      await apiRequest('/brand-applications/me', {
-        method: 'PATCH',
-        data: { applicantNotes: applicantNotes.trim() },
+      const result = await resubmitOwnApplicationAction({
+        applicantNotes: applicantNotes.trim(),
       });
 
-      // 2. Resubmit
-      await apiRequest('/brand-applications/me/submit', {
-        method: 'POST',
-      });
+      if (!result.ok) {
+        alert(result.error || 'Failed to resubmit application.');
+        return;
+      }
 
       setResubmitSuccess(true);
       await fetchApplication();

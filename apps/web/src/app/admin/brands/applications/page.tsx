@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../../context/AuthContext';
-import { apiRequest } from '../../../../lib/api';
+import { listAdminBrandApplicationsAction } from '../../../../lib/supabase/actions';
 import styles from './admin-apps.module.css';
 
 const STATUS_FILTERS = [
@@ -34,18 +34,21 @@ export default function AdminApplicationsPage() {
     setErrorMessage(null);
 
     try {
-      const params = new URLSearchParams();
-      params.set('page', page.toString());
-      params.set('limit', '10');
-      if (statusFilter) params.set('status', statusFilter);
-      if (search.trim()) params.set('search', search.trim());
+      const res = await listAdminBrandApplicationsAction({
+        page,
+        limit: 10,
+        status: statusFilter || undefined,
+        search: search.trim() || undefined,
+      });
 
-      const res = await apiRequest(`/admin/brand-applications?${params.toString()}`);
-      const data = res.data || res;
+      if (!res.ok) {
+        setErrorMessage(res.error || 'Failed to retrieve applications.');
+        return;
+      }
 
-      setApplications(data.items || []);
-      setTotal(data.meta?.total || 0);
-      setTotalPages(data.meta?.totalPages || 1);
+      setApplications(res.data.items || []);
+      setTotal(res.data.meta?.total || 0);
+      setTotalPages(res.data.meta?.totalPages || 1);
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to retrieve applications.');
     } finally {

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
-import { apiRequest } from '../../lib/api';
+import { registerCustomerAction } from '../../lib/supabase/actions';
 import styles from './register.module.css';
 
 export default function RegisterPage() {
@@ -69,21 +69,29 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const response = await apiRequest('/auth/register', {
-        method: 'POST',
-        data: {
-          firstName: formData.firstName.trim(),
-          lastName: formData.lastName.trim(),
-          email: formData.email.trim(),
-          phone: formData.phone.trim() || undefined,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword,
-          agreeToTerms: formData.agreeToTerms,
-        },
+      const result = await registerCustomerAction({
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || undefined,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        agreeToTerms: formData.agreeToTerms,
       });
 
-      if (response?.data?.accessToken && typeof window !== 'undefined') {
-        sessionStorage.setItem('makaura_access_token', response.data.accessToken);
+      if (!result.ok) {
+        setErrorMessage(result.error);
+        return;
+      }
+
+      if (result.data.requiresEmailVerification) {
+        setSuccessMessage(
+          'Account created! Please check your email inbox to verify your address, then sign in.',
+        );
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+        return;
       }
 
       setSuccessMessage('Welcome to Makaura! Your account has been created successfully.');

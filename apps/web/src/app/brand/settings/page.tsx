@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { apiRequest } from '../../../lib/api';
+import { getMyBrandAction } from '../../../lib/supabase/actions';
 import styles from '../dashboard/dashboard.module.css';
 
 export default function BrandSettingsPage() {
@@ -20,9 +20,13 @@ export default function BrandSettingsPage() {
         return;
       }
 
-      apiRequest('/brands/me')
+      getMyBrandAction()
         .then((res) => {
-          setBrand(res.data || res);
+          if (!res.ok) {
+            router.push('/brand/application-status');
+            return;
+          }
+          setBrand(res.data);
           setIsLoading(false);
         })
         .catch(() => {

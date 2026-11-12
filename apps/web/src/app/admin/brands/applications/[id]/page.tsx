@@ -4,7 +4,10 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '../../../../../context/AuthContext';
-import { apiRequest } from '../../../../../lib/api';
+import {
+  getAdminBrandApplicationByIdAction,
+  updateAdminBrandApplicationStatusAction,
+} from '../../../../../lib/supabase/actions';
 import styles from './admin-app-detail.module.css';
 
 export default function ApplicationDetailPage() {
@@ -28,8 +31,13 @@ export default function ApplicationDetailPage() {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const res = await apiRequest(`/admin/brand-applications/${id}`);
-      setApp(res.data || res);
+      const res = await getAdminBrandApplicationByIdAction(id);
+      if (!res.ok) {
+        setErrorMessage(res.error || 'Failed to load application details.');
+        setApp(null);
+      } else {
+        setApp(res.data);
+      }
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to load application details.');
     } finally {
@@ -65,17 +73,30 @@ export default function ApplicationDetailPage() {
     setIsProcessing(true);
 
     try {
-      const payload: any = { status: modalType };
+      const targetStatus =
+        modalType === 'APPROVE'
+          ? 'APPROVED'
+          : modalType === 'REJECT'
+          ? 'REJECTED'
+          : modalType;
+
+      const payload: {
+        status: string;
+        rejectionReason?: string;
+        additionalInfoRequest?: string;
+      } = { status: targetStatus };
+
       if (modalType === 'REJECT') {
         payload.rejectionReason = modalInput.trim();
       } else if (modalType === 'NEEDS_MORE_INFORMATION') {
         payload.additionalInfoRequest = modalInput.trim();
       }
 
-      await apiRequest(`/admin/brand-applications/${id}/status`, {
-        method: 'PATCH',
-        data: payload,
-      });
+      const res = await updateAdminBrandApplicationStatusAction(id, payload);
+      if (!res.ok) {
+        alert(res.error || 'Failed to update application status.');
+        return;
+      }
 
       setModalType(null);
       setModalInput('');
