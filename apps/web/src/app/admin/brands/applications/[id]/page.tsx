@@ -8,6 +8,7 @@ import {
   getAdminBrandApplicationByIdAction,
   updateAdminBrandApplicationStatusAction,
 } from '../../../../../lib/supabase/actions';
+import AdminShell from '../../../../../components/admin/AdminShell';
 import styles from './admin-app-detail.module.css';
 
 export default function ApplicationDetailPage() {
@@ -131,11 +132,12 @@ export default function ApplicationDetailPage() {
   const bankAccount = brand?.bankAccounts?.[0];
 
   return (
-    <div className={styles.container}>
-      <div className={styles.wrapper}>
-        <Link href="/admin/brands/applications" className={styles.backLink}>
-          ← Back to Applications Queue
-        </Link>
+    <AdminShell>
+      <div className={styles.container}>
+        <div className={styles.wrapper}>
+          <Link href="/admin/brands/applications" className={styles.backLink}>
+            ← Back to Applications Queue
+          </Link>
 
         <div className={styles.topBar}>
           <div>
@@ -442,5 +444,6 @@ export default function ApplicationDetailPage() {
         )}
       </div>
     </div>
+    </AdminShell>
   );
 }

@@ -1,0 +1,248 @@
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.4rem 0;
+  letter-spacing: -0.5px;
+}
+
+.pageSubtitle {
+  font-size: 0.9rem;
+  color: #8b949e;
+  margin: 0;
+}
+
+.btnSaveTop {
+  background: linear-gradient(135deg, #d4af37, #b8860b);
+  color: #0b0f19;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.65rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.15s ease;
+}
+
+.btnSaveTop:hover {
+  opacity: 0.92;
+}
+
+/* Card Section */
+.card {
+  background-color: #111622;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+
+.cardHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #21262d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cardIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: #1f2430;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d4af37;
+}
+
+.cardTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.cardSubtitle {
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin: 0.15rem 0 0 0;
+}
+
+.cardBody {
+  padding: 1.5rem;
+}
+
+/* Toggle Switch */
+.switchLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #30363d;
+  transition: 0.2s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #238636;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.switchStatusText {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #c9d1d9;
+}
+
+/* Grid Layouts */
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Form Controls */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+  color: #ffffff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.input:focus {
+  border-color: #d4af37;
+}
+
+.select {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+  color: #ffffff;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.textarea {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+  color: #ffffff;
+  font-size: 0.9rem;
+  outline: none;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.textarea:focus {
+  border-color: #d4af37;
+}
+
+.inputHint {
+  font-size: 0.75rem;
+  color: #8b949e;
+  margin: 0.2rem 0 0 0;
+}
+
+/* Success Banner */
+.toastSuccess {
+  background-color: rgba(35, 134, 54, 0.15);
+  border: 1px solid #3fb950;
+  color: #3fb950;
+  padding: 0.85rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+

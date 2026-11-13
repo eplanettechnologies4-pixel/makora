@@ -4,7 +4,11 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../../context/AuthContext';
-import { listAdminBrandApplicationsAction } from '../../../../lib/supabase/actions';
+import {
+  listAdminBrandApplicationsAction,
+  updateAdminBrandApplicationStatusAction,
+} from '../../../../lib/supabase/actions';
+import AdminShell from '../../../../components/admin/AdminShell';
 import styles from './admin-apps.module.css';
 
 const STATUS_FILTERS = [
@@ -28,6 +32,7 @@ export default function AdminApplicationsPage() {
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   const fetchApplications = async () => {
     setIsLoading(true);
@@ -74,29 +79,51 @@ export default function AdminApplicationsPage() {
     fetchApplications();
   };
 
+  const handleQuickApprove = async (id: string, brandName: string) => {
+    if (!confirm(`Are you sure you want to approve "${brandName}"? This will officially register the brand and activate its store on Makaura.`)) {
+      return;
+    }
+
+    setApprovingId(id);
+    try {
+      const res = await updateAdminBrandApplicationStatusAction(id, { status: 'APPROVED' });
+      if (res.ok) {
+        await fetchApplications();
+      } else {
+        alert(res.error || 'Failed to approve application.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Error approving application.');
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
   if (authLoading) {
-    return <div style={{ padding: '3rem', textAlign: 'center' }}>Authenticating administrative session...</div>;
+    return <div style={{ padding: '3rem', textAlign: 'center', color: '#e6edf3' }}>Authenticating administrative session...</div>;
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.wrapper}>
-        {/* Top Header */}
-        <div className={styles.topBar}>
-          <div>
-            <h1 className={styles.pageTitle}>Brand Onboarding Queue</h1>
-            <p className={styles.pageSubtitle}>
-              Review compliance, business documentation, and approve incoming cosmetic houses.
-            </p>
-          </div>
+    <AdminShell pendingCount={total}>
+      <div className={styles.container}>
+        <div className={styles.wrapper}>
+          {/* Top Header */}
+          <div className={styles.topBar}>
+            <div>
+              <h1 className={styles.pageTitle}>Brand Onboarding Queue</h1>
+              <p className={styles.pageSubtitle}>
+                Review incoming brand owner requests, verify SECP/NTN credentials, and approve official registration on Makaura.
+              </p>
+            </div>
 
-          <div className={styles.adminBadge}>
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            <span>{user?.firstName} {user?.lastName} (Admin)</span>
+            <Link
+              href="/admin/brands"
+              className={styles.tabBtnActive}
+              style={{ borderRadius: '6px', padding: '0.65rem 1.25rem', textDecoration: 'none' }}
+            >
+              🏢 Manage Active Brands ({total}) →
+            </Link>
           </div>
-        </div>
 
         {/* Filter & Search Bar */}
         <div className={styles.controlsCard}>
@@ -186,13 +213,33 @@ export default function AdminApplicationsPage() {
                       </span>
                     </td>
                     <td className={styles.td} style={{ textAlign: 'right' }}>
-                      <Link
-                        href={`/admin/brands/applications/${app.id}`}
-                        className={styles.viewBtn}
-                        id={`view-app-${app.id}`}
-                      >
-                        Review Application →
-                      </Link>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                        {app.status !== 'APPROVED' && (
+                          <button
+                            onClick={() => handleQuickApprove(app.id, app.brand?.name || 'this brand')}
+                            disabled={approvingId === app.id}
+                            style={{
+                              backgroundColor: 'rgba(35, 134, 54, 0.2)',
+                              border: '1px solid #3fb950',
+                              color: '#3fb950',
+                              padding: '0.4rem 0.75rem',
+                              borderRadius: '6px',
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {approvingId === app.id ? 'Approving...' : '✓ Approve Brand'}
+                          </button>
+                        )}
+                        <Link
+                          href={`/admin/brands/applications/${app.id}`}
+                          className={styles.viewBtn}
+                          id={`view-app-${app.id}`}
+                        >
+                          Review Dossier →
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -225,5 +272,6 @@ export default function AdminApplicationsPage() {
         </div>
       </div>
     </div>
+    </AdminShell>
   );
 }

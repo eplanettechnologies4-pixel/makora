@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import StorefrontShell from '../components/StorefrontShell';
 import { AuthProvider } from '../context/AuthContext';
 import { CartProvider } from '../context/CartContext';
 
@@ -41,9 +40,7 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <CartProvider>
-            <Header />
-            <main>{children}</main>
-            <Footer />
+            <StorefrontShell>{children}</StorefrontShell>
           </CartProvider>
         </AuthProvider>
       </body>

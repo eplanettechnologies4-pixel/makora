@@ -1,0 +1,350 @@
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.4rem 0;
+  letter-spacing: -0.5px;
+}
+
+.pageSubtitle {
+  font-size: 0.9rem;
+  color: #8b949e;
+  margin: 0;
+}
+
+.actionBtnGold {
+  background: linear-gradient(135deg, #d4af37, #b8860b);
+  color: #0b0f19;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 6px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.actionBtnGold:hover {
+  opacity: 0.92;
+}
+
+/* Alert Banner */
+.alertCard {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.alertContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.alertIcon {
+  color: #d4af37;
+  display: flex;
+}
+
+.alertTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.alertDesc {
+  font-size: 0.8rem;
+  color: #c9d1d9;
+  margin: 0.2rem 0 0 0;
+}
+
+.alertLink {
+  background-color: #d4af37;
+  color: #0d1117;
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* KPIs Grid */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.kpiCard {
+  background-color: #111622;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.kpiTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.kpiLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpiIconBox {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1f2430;
+  color: #d4af37;
+}
+
+.kpiValue {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.5px;
+}
+
+.kpiMeta {
+  font-size: 0.78rem;
+  color: #8b949e;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Sections */
+.sectionCard {
+  background-color: #111622;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.sectionHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #21262d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.viewAllLink {
+  color: #d4af37;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.viewAllLink:hover {
+  text-decoration: underline;
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.th {
+  padding: 0.85rem 1.5rem;
+  background-color: #0d1117;
+  color: #8b949e;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #21262d;
+}
+
+.tr {
+  border-bottom: 1px solid #1f2430;
+  transition: background-color 0.15s ease;
+}
+
+.tr:hover {
+  background-color: #161c28;
+}
+
+.td {
+  padding: 1rem 1.5rem;
+  color: #c9d1d9;
+  vertical-align: middle;
+}
+
+/* Brand Identity Cell */
+.brandCell {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.brandAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #30363d;
+  background-color: #1f2430;
+}
+
+.brandName {
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.brandSlug {
+  font-size: 0.75rem;
+  color: #8b949e;
+  margin: 0.15rem 0 0 0;
+}
+
+/* Status Badges */
+.badgeApproved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background-color: rgba(35, 134, 54, 0.15);
+  color: #3fb950;
+  border: 1px solid rgba(63, 185, 80, 0.3);
+}
+
+.badgeSuspended {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background-color: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.3);
+}
+
+.badgePending {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background-color: rgba(210, 153, 34, 0.15);
+  color: #d29922;
+  border: 1px solid rgba(210, 153, 34, 0.3);
+}
+
+/* Actions in Table */
+.actionGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btnActionOutline {
+  background: transparent;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.btnActionOutline:hover {
+  background-color: #21262d;
+  color: #ffffff;
+  border-color: #8b949e;
+}
+
+.btnActionKeep {
+  background: rgba(35, 134, 54, 0.2);
+  border: 1px solid rgba(63, 185, 80, 0.4);
+  color: #3fb950;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnActionKeep:hover {
+  background-color: rgba(35, 134, 54, 0.35);
+}
+
+.btnActionSuspend {
+  background: rgba(248, 81, 73, 0.15);
+  border: 1px solid rgba(248, 81, 73, 0.4);
+  color: #f85149;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnActionSuspend:hover {
+  background-color: rgba(248, 81, 73, 0.28);
+}
+

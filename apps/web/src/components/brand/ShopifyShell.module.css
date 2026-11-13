@@ -1,0 +1,284 @@
+/* Shopify Polaris Admin Style Layout */
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f1f2f4;
+  font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Segoe UI', Roboto, Helvetica, sans-serif;
+  color: #111213;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background-color: #111213;
+  color: #c9cccf;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  user-select: none;
+}
+
+.storeHeader {
+  padding: 1rem 1rem 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.storeBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.storeIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #2a2b2d;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.storeIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.storeTitleGroup {
+  min-width: 0;
+}
+
+.storeName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.storePlan {
+  font-size: 0.7rem;
+  color: #8c9196;
+}
+
+.viewStoreIcon {
+  color: #8c9196;
+  padding: 0.35rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.viewStoreIcon:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Navigation */
+.nav {
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #c9cccf;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.navItem:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.navItemActive {
+  background-color: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.navItemIcon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.badge {
+  margin-left: auto;
+  background: #303030;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+
+/* User Account Footer */
+.userSection {
+  padding: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.userBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.userAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #202123;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userName {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #e3e5e7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logoutBtn {
+  background: transparent;
+  border: none;
+  color: #8c9196;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.logoutBtn:hover {
+  color: #ff6b6b;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Main Canvas */
+.canvas {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top App Bar */
+.topBar {
+  height: 52px;
+  background: #111213;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+}
+
+.searchBar {
+  position: relative;
+  width: 420px;
+}
+
+.searchInput {
+  width: 100%;
+  height: 32px;
+  background: #202123;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.8125rem;
+  padding: 0 0.75rem 0 2rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.searchInput:focus {
+  border-color: #008060;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8c9196;
+  pointer-events: none;
+}
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.onlineStorePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  background: #202123;
+  color: #e3e5e7;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: background 0.15s;
+}
+
+.onlineStorePill:hover {
+  background: #2b2c2f;
+  color: #ffffff;
+}
+
+/* Main Content Area */
+.contentArea {
+  flex: 1;
+  padding: 1.75rem 2rem 3rem 2rem;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+

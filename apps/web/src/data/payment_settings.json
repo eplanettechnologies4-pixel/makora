@@ -1,0 +1,59 @@
+{
+  "cod": {
+    "enabled": true,
+    "label": "Cash on Delivery (COD)",
+    "description": "Pay with physical cash upon package delivery directly at your doorstep.",
+    "shippingFee": 250,
+    "freeDeliveryThreshold": 5000,
+    "maxOrderAmount": 75000,
+    "supportedCities": [
+      "All Pakistan",
+      "Lahore",
+      "Karachi",
+      "Islamabad",
+      "Rawalpindi",
+      "Faisalabad",
+      "Multan",
+      "Peshawar",
+      "Quetta",
+      "Sialkot"
+    ]
+  },
+  "bankTransfer": {
+    "enabled": true,
+    "label": "Direct Bank Transfer / Raast (IBFT)",
+    "bankName": "Meezan Bank Limited",
+    "accountTitle": "Makaura Luxury Marketplace Pvt Ltd",
+    "accountNumber": "0102-0105492819",
+    "iban": "PK64MEZN0001020105492819",
+    "branchCode": "0102",
+    "branchName": "Gulberg III Main Branch, Lahore",
+    "raastId": "03001234567",
+    "instructions": "Please transfer the exact order amount using your banking app or Raast. Mention your Order Number in the payment reference. Once completed, your order will be verified within 30 minutes.",
+    "requiresSlipUpload": true
+  },
+  "onlineGateway": {
+    "enabled": true,
+    "provider": "payfast",
+    "label": "PayFast / Visa, MasterCard, UnionPay & Wallets",
+    "environment": "sandbox",
+    "merchantId": "MKR-MERCHANT-88219",
+    "publicKey": "pk_test_makaura_99214918231",
+    "supportedMethods": [
+      "Visa",
+      "MasterCard",
+      "UnionPay",
+      "PayPak",
+      "JazzCash",
+      "EasyPaisa"
+    ]
+  },
+  "commission": {
+    "defaultCommissionRate": 15,
+    "payoutFrequency": "WEEKLY",
+    "minPayoutAmount": 10000,
+    "holdPeriodDays": 7
+  },
+  "lastUpdated": "2026-11-13T11:14:22.970Z",
+  "updatedBy": "admin@makaura.com"
+}

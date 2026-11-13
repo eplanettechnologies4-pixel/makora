@@ -1,0 +1,170 @@
+.sidebar {
+  width: 260px;
+  background: #ffffff;
+  border-right: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  min-height: calc(100vh - 80px);
+  flex-shrink: 0;
+}
+
+.brandBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+}
+
+.brandAvatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f0ede8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.brandInfo {
+  min-width: 0;
+  flex: 1;
+}
+
+.brandBadgeName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusPill {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #e6f7ff;
+  color: #0050b3;
+  margin-top: 0.2rem;
+}
+
+.statusApproved {
+  background: #f6ffed;
+  color: #389e0d;
+}
+
+.navSection {
+  margin-bottom: 1.5rem;
+}
+
+.navSectionTitle {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  font-weight: 700;
+  padding: 0 0.75rem 0.5rem;
+}
+
+.navLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.navItem:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.navItemActive {
+  background: #f7f3ec;
+  color: #1a1a1a;
+  font-weight: 600;
+  border-left: 3px solid #b38b4d;
+}
+
+.navItemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.bottomSection {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.liveStoreBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  background: #1a1a1a;
+  color: #ffffff;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.liveStoreBtn:hover {
+  opacity: 0.9;
+}
+
+.signOutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: transparent;
+  border: none;
+  color: #cf1322;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.signOutBtn:hover {
+  background: #fff1f0;
+}
+

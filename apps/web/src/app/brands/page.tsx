@@ -15,6 +15,15 @@ interface BrandProfile {
 
 const VERIFIED_BRANDS: BrandProfile[] = [
   {
+    name: "Adan's Libas",
+    slug: 'adans-libas',
+    city: 'Lahore, Punjab',
+    specialty: 'Luxury Embroidered Couture & Pret',
+    bio: "Timeless Pakistani craftsmanship, hand-embroidered silhouettes, and contemporary luxury festive formals.",
+    bannerImage: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=700&q=80',
+    formulationCount: 48,
+  },
+  {
     name: 'Maison de Rose',
     slug: 'maison-de-rose',
     city: 'Lahore, Punjab',
@@ -94,7 +103,7 @@ export default function BrandsDirectoryPage() {
           {VERIFIED_BRANDS.map((brand) => (
             <Link
               key={brand.slug}
-              href={`/shop?brand=${brand.slug}`}
+              href={`/brands/${brand.slug}`}
               className={styles.card}
               id={`dir-brand-${brand.slug}`}
             >

@@ -16,6 +16,7 @@ export default function AdminLoginPage() {
     password: '',
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -49,7 +50,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      router.push('/admin/brands/applications');
+      router.push('/admin/dashboard');
     } catch (err: any) {
       setErrorMessage(
         err.message || 'Administrative authentication failed. Check credentials.',
@@ -113,13 +114,30 @@ export default function AdminLoginPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.label}>
-              Security Key / Password
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label htmlFor="admin-password" className={styles.label}>
+                Security Key / Password
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--accent-gold, #b8860b)',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  padding: 0,
+                  fontWeight: 500,
+                }}
+              >
+                {showPassword ? 'Hide Password' : 'Show Password'}
+              </button>
+            </div>
             <input
               id="admin-password"
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               required
               className={styles.input}
               placeholder="••••••••••••"
@@ -138,6 +156,41 @@ export default function AdminLoginPage() {
             {isLoading ? 'Verifying Credentials...' : 'Authenticate & Enter'}
           </button>
         </form>
+
+        {/* Quick Fill Helper */}
+        <div style={{ marginTop: '1.25rem', padding: '0.85rem', backgroundColor: '#fdfbf7', borderRadius: '8px', border: '1px solid #f1e5cc', textAlign: 'center' }}>
+          <p style={{ margin: '0 0 0.35rem 0', fontSize: '0.75rem', color: '#856404', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Master Admin Demo Credentials
+          </p>
+          <div style={{ fontSize: '0.8rem', color: '#374151', marginBottom: '0.65rem', lineHeight: '1.4' }}>
+            <div>Email: <strong style={{ color: '#111827' }}>admin@makaura.com</strong></div>
+            <div>Password: <strong style={{ color: '#111827' }}>admin123456</strong></div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setFormData({ email: 'admin@makaura.com', password: 'admin123456' });
+              setErrorMessage(null);
+            }}
+            style={{
+              background: '#111827',
+              color: '#d4af37',
+              border: '1px solid #d4af37',
+              padding: '0.45rem 1rem',
+              borderRadius: '6px',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.4rem',
+            }}
+          >
+            <span>⚡ Click to Auto-Fill Credentials</span>
+          </button>
+        </div>
 
         <div className={styles.securityFooter} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
           <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">

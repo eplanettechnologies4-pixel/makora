@@ -4,13 +4,20 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { getMyBrandAction } from '../../../lib/supabase/actions';
-import styles from './dashboard.module.css';
+import {
+  getMyBrandAction,
+  getMyBrandProductsAction,
+  getMyBrandOrdersAction,
+} from '../../../lib/supabase/actions';
+import ShopifyShell from '../../../components/brand/ShopifyShell';
+import styles from '../products/shopify-product.module.css';
 
 export default function BrandDashboardPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading, logout } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [brand, setBrand] = useState<any>(null);
+  const [products, setProducts] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -20,164 +27,250 @@ export default function BrandDashboardPage() {
         return;
       }
 
-      // Check user role
       if (user.role !== 'BRAND_OWNER' && user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
         router.push('/brand/register');
         return;
       }
 
-      // Load brand profile
-      getMyBrandAction()
-        .then((res) => {
-          if (!res.ok) {
+      Promise.all([
+        getMyBrandAction(),
+        getMyBrandProductsAction(),
+        getMyBrandOrdersAction(),
+      ])
+        .then(([bRes, pRes, oRes]) => {
+          if (!bRes.ok) {
             router.push('/brand/application-status');
             return;
           }
-          const brandData = res.data;
-          // Status gating: If not approved, redirect to application-status
+          const brandData = bRes.data;
           if (brandData.status !== 'APPROVED') {
             router.push('/brand/application-status');
-          } else {
-            setBrand(brandData);
-            setIsLoading(false);
+            return;
           }
+          setBrand(brandData);
+          if (pRes.ok) setProducts(pRes.data || []);
+          if (oRes.ok) setOrders(oRes.data || []);
+          setIsLoading(false);
         })
-        .catch(() => {
-          router.push('/brand/application-status');
-        });
+        .catch(() => router.push('/brand/application-status'));
     }
   }, [user, authLoading, router]);
 
   if (authLoading || isLoading) {
     return (
-      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>Loading your brand workspace...</p>
+      <div style={{ padding: '3rem', textAlign: 'center', color: '#6d7175' }}>
+        Loading dashboard...
       </div>
     );
   }
 
+  const brandSlug = brand?.slug || 'adans-libas';
+  const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+  const unfulfilledOrders = orders.filter(
+    (o) => o.fulfillmentStatus === 'PENDING' || o.fulfillmentStatus === 'PROCESSING'
+  ).length;
+
   return (
-    <div className={styles.dashboardLayout}>
-      {/* Sidebar */}
-      <aside className={styles.sidebar}>
-        <div className={styles.brandBadge}>
-          <div className={styles.brandBadgeName}>{brand?.name || 'Your Brand'}</div>
-          <span className={styles.statusPill}>
-            {brand?.status || 'APPROVED'}
-          </span>
-        </div>
+    <ShopifyShell brand={brand}>
+      {/* Top Banner / Welcome */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>
+          Welcome back, {user?.firstName}
+        </h1>
+        <p style={{ fontSize: '0.8125rem', color: '#6d7175', margin: 0 }}>
+          Manage your products, banner, categories, and orders for {brand?.name}.
+        </p>
+      </div>
 
-        <nav className={styles.navLinks}>
-          <Link href="/brand/dashboard" className={`${styles.navItem} ${styles.navItemActive}`}>
-            Overview
-          </Link>
-          <Link href="/brand/profile" className={styles.navItem}>
-            Brand Profile
-          </Link>
-          <Link href="/brand/settings" className={styles.navItem}>
-            Settings & Banking
-          </Link>
-          <Link href="/brand/application-status" className={styles.navItem}>
-            Compliance Record
-          </Link>
-        </nav>
-
-        <button
-          onClick={() => logout().then(() => router.push('/'))}
-          className={styles.navItem}
-          style={{ background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', marginTop: 'auto' }}
-        >
-          Sign Out
-        </button>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className={styles.mainContent}>
-        <div className={styles.topBar}>
-          <div>
-            <h1 className={styles.pageTitle}>Seller Workspace</h1>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-              Manage your storefront catalog and view store health on Makaura.
-            </p>
+      {/* Metric Cards (Shopify KPI style) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div className={styles.card}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6d7175', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+            Total Sales
           </div>
-
-          <div className={styles.userProfileSnippet}>
-            <div className={styles.userAvatar}>
-              {user?.firstName?.[0] || 'B'}
-            </div>
-            <div>
-              <div className={styles.userName}>
-                {user?.firstName} {user?.lastName}
-              </div>
-              <div className={styles.userRole}>Brand Owner • @{brand?.slug}</div>
-            </div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111213' }}>
+            Rs. {totalRevenue.toLocaleString()}
           </div>
         </div>
 
-        {/* Phase 2 Operational Shell Metrics */}
-        <div className={styles.metricGrid}>
-          <div className={styles.metricCard}>
-            <div className={styles.metricLabel}>Marketplace Status</div>
-            <div className={styles.metricValue} style={{ color: '#237804', fontSize: '1.75rem' }}>
-              Active Seller
-            </div>
-            <div className={styles.metricSubtext}>Verified & Approved</div>
+        <div className={styles.card}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6d7175', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+            Orders to Fulfill
           </div>
-
-          <div className={styles.metricCard}>
-            <div className={styles.metricLabel}>Agreed Commission</div>
-            <div className={styles.metricValue}>
-              {brand?.commissionRate ? `${brand.commissionRate}%` : '10.00%'}
-            </div>
-            <div className={styles.metricSubtext}>Standard Beauty Tier</div>
-          </div>
-
-          <div className={styles.metricCard}>
-            <div className={styles.metricLabel}>Payout Schedule</div>
-            <div className={styles.metricValue}>COD Weekly</div>
-            <div className={styles.metricSubtext}>Reconciled Post-Delivery</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: unfulfilledOrders > 0 ? '#b95000' : '#111213' }}>
+            {unfulfilledOrders}
           </div>
         </div>
 
-        {/* Informational Guidance Notice */}
-        <div className={styles.phaseNotice}>
-          <span className={styles.phaseTag}>Phase 2 Milestone Complete</span>
-          <h2 className={styles.noticeTitle}>Storefront Activation & Authentication Verified</h2>
-          <p className={styles.noticeDesc}>
-            Your brand is officially authorized on the Makaura Beauty Multi-Vendor platform.
-            Product catalog management, inventory SKU tracking, and multi-vendor order routing will be enabled in Phase 3.
-          </p>
-          <div style={{ marginTop: '1.25rem', display: 'flex', gap: '1rem' }}>
+        <div className={styles.card}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6d7175', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+            Products in Catalog
+          </div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111213' }}>
+            {products.length}
+          </div>
+        </div>
+      </div>
+
+      {/* Two Column Layout */}
+      <div className={styles.productGrid}>
+        {/* Left: Quick Actions & Recent Orders */}
+        <div className={styles.columnMain}>
+          {/* Quick Actions (Shopify Setup Checklist) */}
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Quick Setup & Management</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <Link
+                href="/brand/banner"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid #e1e3e5',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  color: '#111213',
+                  background: '#fafbfb',
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>Update Store Banner & Logo</div>
+                  <div style={{ fontSize: '0.75rem', color: '#6d7175' }}>Customize the top banner shown on your Makaura brand page</div>
+                </div>
+                <span style={{ fontSize: '0.8125rem', color: '#008060', fontWeight: 600 }}>Edit banner →</span>
+              </Link>
+
+              <Link
+                href="/brand/products/new"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid #e1e3e5',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  color: '#111213',
+                  background: '#fafbfb',
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>Add a New Product</div>
+                  <div style={{ fontSize: '0.75rem', color: '#6d7175' }}>Set title, description, price, and upload gallery images</div>
+                </div>
+                <span style={{ fontSize: '0.8125rem', color: '#008060', fontWeight: 600 }}>Add product →</span>
+              </Link>
+
+              <Link
+                href="/brand/categories"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid #e1e3e5',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  color: '#111213',
+                  background: '#fafbfb',
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>Manage Categories</div>
+                  <div style={{ fontSize: '0.75rem', color: '#6d7175' }}>Organize products into collections for customers to filter</div>
+                </div>
+                <span style={{ fontSize: '0.8125rem', color: '#008060', fontWeight: 600 }}>Categories →</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Recent Orders Table */}
+          <div className={styles.card} style={{ padding: 0, overflow: 'hidden' }}>
+            <div style={{ padding: '1rem', borderBottom: '1px solid #e1e3e5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 className={styles.cardTitle} style={{ margin: 0 }}>Recent Orders</h2>
+              <Link href="/brand/orders" style={{ fontSize: '0.8125rem', color: '#008060', textDecoration: 'none', fontWeight: 600 }}>
+                View all ({orders.length}) →
+              </Link>
+            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8125rem' }}>
+              <thead>
+                <tr style={{ background: '#fafbfb', borderBottom: '1px solid #e1e3e5', color: '#6d7175' }}>
+                  <th style={{ padding: '0.65rem 1rem' }}>Order</th>
+                  <th style={{ padding: '0.65rem 1rem' }}>Customer</th>
+                  <th style={{ padding: '0.65rem 1rem' }}>Status</th>
+                  <th style={{ padding: '0.65rem 1rem', textAlign: 'right' }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.slice(0, 4).map((order) => {
+                  const isFulfilled =
+                    order.fulfillmentStatus === 'DISPATCHED' || order.fulfillmentStatus === 'DELIVERED';
+                  return (
+                    <tr key={order.id} style={{ borderBottom: '1px solid #f1f2f4' }}>
+                      <td style={{ padding: '0.65rem 1rem', fontWeight: 600 }}>
+                        <Link href="/brand/orders" style={{ color: '#111213', textDecoration: 'none' }}>
+                          {order.orderNumber}
+                        </Link>
+                      </td>
+                      <td style={{ padding: '0.65rem 1rem' }}>{order.customerName}</td>
+                      <td style={{ padding: '0.65rem 1rem' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: '999px',
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          background: isFulfilled ? '#e4f8ec' : '#fff4e5',
+                          color: isFulfilled ? '#108043' : '#b95000',
+                        }}>
+                          {isFulfilled ? 'Fulfilled' : 'Unfulfilled'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.65rem 1rem', fontWeight: 600, textAlign: 'right' }}>
+                        Rs. {order.total?.toLocaleString()}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Right Sidebar: Store summary */}
+        <div className={styles.columnSidebar}>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>Online Store</h2>
+            <div style={{
+              width: '100%',
+              height: '120px',
+              borderRadius: '6px',
+              overflow: 'hidden',
+              marginBottom: '0.75rem',
+              border: '1px solid #e1e3e5',
+            }}>
+              {brand?.bannerUrl ? (
+                <img src={brand.bannerUrl} alt="Store Banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ height: '100%', background: '#222' }} />
+              )}
+            </div>
+            <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{brand?.name}</div>
+            <div style={{ fontSize: '0.75rem', color: '#6d7175', marginBottom: '1rem' }}>
+              makaura.pk/brands/{brandSlug}
+            </div>
             <Link
-              href="/brand/profile"
-              style={{
-                padding: '0.625rem 1.25rem',
-                background: 'var(--text-primary)',
-                color: '#ffffff',
-                borderRadius: 'var(--radius-md)',
-                textDecoration: 'none',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-              }}
+              href={`/brands/${brandSlug}`}
+              target="_blank"
+              className={styles.btnSecondary}
+              style={{ width: '100%', textAlign: 'center', display: 'block' }}
             >
-              Update Brand Profile →
-            </Link>
-            <Link
-              href="/brand/settings"
-              style={{
-                padding: '0.625rem 1.25rem',
-                border: '1px solid var(--border-light)',
-                borderRadius: 'var(--radius-md)',
-                textDecoration: 'none',
-                fontSize: '0.875rem',
-                color: 'var(--text-primary)',
-              }}
-            >
-              View Masked Banking →
+              View Online Store ↗
             </Link>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </ShopifyShell>
   );
 }
