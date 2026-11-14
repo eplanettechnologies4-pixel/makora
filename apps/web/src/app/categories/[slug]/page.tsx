@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import ProductCard, { Product } from '../../../components/storefront/ProductCard';
+import { getMarketplaceProductsAction } from '../../../lib/supabase/actions';
 import styles from '../../shop/shop.module.css';
 
 const CATEGORY_DATA: Record<string, { title: string; desc: string; categoryKey: string }> = {
@@ -146,7 +147,21 @@ export default function CategoryDynamicPage() {
     categoryKey: slug,
   };
 
-  const products = ALL_PRODUCTS.filter((p) => p.category === info.categoryKey || slug === 'all');
+  const initialFiltered = ALL_PRODUCTS.filter((p) => p.category === info.categoryKey || slug === 'all');
+  const [products, setProducts] = useState<Product[]>(initialFiltered);
+
+  useEffect(() => {
+    getMarketplaceProductsAction({
+      category: slug !== 'all' ? slug : undefined,
+      limit: 12,
+    })
+      .then((res) => {
+        if (res.ok && res.data && res.data.length > 0) {
+          setProducts(res.data as Product[]);
+        }
+      })
+      .catch((err) => console.warn('Failed to load category products:', err));
+  }, [slug]);
 
   return (
     <div className={styles.shopPage}>

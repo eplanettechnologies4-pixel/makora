@@ -1,61 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getMarketplaceBrandsAction, type MarketplaceBrandCard } from '../../lib/supabase/actions';
+import { DUMMY_STORE_BRANDS } from '../../lib/dummyCatalog';
 import styles from './BrandRail.module.css';
 
-interface BrandStore {
-  name: string;
-  slug: string;
-  origin: string;
-  category: string;
-  focus: string;
-  productCount: number;
-  image: string;
-}
-
-const BRAND_STORES: BrandStore[] = [
-  {
-    name: 'Maison de Rose',
-    slug: 'maison-de-rose',
-    origin: 'Lahore, PK',
-    category: 'Botanical Skincare',
-    focus: 'Cold-pressed Kashmiri rosehip & pure saffron cellular elixirs.',
-    productCount: 18,
-    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    name: 'Noor Artisanal Cosmetics',
-    slug: 'noor-artisanal',
-    origin: 'Islamabad, PK',
-    category: 'Velvet Color Cosmetics',
-    focus: 'Halal silk lip rouges, mineral foundation drops & soft blushes.',
-    productCount: 24,
-    image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    name: 'Aura Scents House',
-    slug: 'aura-scents',
-    origin: 'Karachi, PK',
-    category: 'Niche Perfumery',
-    focus: 'Hand-distilled Cambodian oud, ambergris & Damascena attars.',
-    productCount: 14,
-    image: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    name: 'Botanica Raw Labs',
-    slug: 'botanica-raw-labs',
-    origin: 'Gilgit-Baltistan',
-    category: 'Scalp & Hair Rituals',
-    focus: 'High-altitude rosemary scalp oils & cold-extracted wild amla.',
-    productCount: 16,
-    image: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=700&q=80',
-  },
-];
-
 export default function BrandRail() {
+  const [brands, setBrands] = useState<MarketplaceBrandCard[]>(DUMMY_STORE_BRANDS.slice(0, 4));
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    getMarketplaceBrandsAction(4)
+      .then((res) => {
+        if (res.ok && res.data && res.data.length > 0) {
+          setBrands(res.data);
+        }
+      })
+      .catch((err) => console.warn('Failed to load dynamic brands for BrandRail:', err));
+  }, []);
 
   return (
     <section className={styles.section} aria-label="Shop by Brands">
@@ -80,7 +44,7 @@ export default function BrandRail() {
         </div>
 
         <div className={styles.brandsGrid}>
-          {BRAND_STORES.map((b) => {
+          {brands.map((b) => {
             const imgSrc = failedImages[b.slug]
               ? 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=700&q=80'
               : b.image;
@@ -98,7 +62,9 @@ export default function BrandRail() {
                     onError={() => setFailedImages((prev) => ({ ...prev, [b.slug]: true }))}
                   />
                   <div className={styles.bannerOverlay} />
-                  <span className={styles.productCountBadge}>{b.productCount} Formulations</span>
+                  <span className={styles.productCountBadge}>
+                    {b.productCount > 0 ? `${b.productCount} Creations` : 'Featured Partner'}
+                  </span>
                 </div>
 
                 {/* Brand Info */}
@@ -112,7 +78,7 @@ export default function BrandRail() {
                   <p className={styles.brandFocus}>{b.focus}</p>
 
                   <div className={styles.actionRow}>
-                    <Link href={`/shop?brand=${b.slug}`} className={styles.visitStoreBtn}>
+                    <Link href={`/brands/${b.slug}`} className={styles.visitStoreBtn}>
                       Visit Storefront
                     </Link>
                   </div>

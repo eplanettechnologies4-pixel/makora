@@ -407,7 +407,7 @@ function ProductFormContent() {
                 type="text"
                 disabled
                 className={styles.input}
-                value={brand?.name || "Adan's Libas"}
+                value={brand?.name || user?.brand?.name || ''}
                 style={{ background: '#f6f6f7', color: '#6d7175' }}
               />
             </div>

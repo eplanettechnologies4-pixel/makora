@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import styles from './ShopifyShell.module.css';
 
 interface ShopifyShellProps {
-  brand: {
+  brand?: {
     name?: string;
     slug?: string;
     status?: string;
@@ -21,8 +21,23 @@ export default function ShopifyShell({ brand, children }: ShopifyShellProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  const brandName = brand?.name || "Your Store";
-  const brandSlug = brand?.slug || 'adans-libas';
+  const activeBrand = brand || (user?.brand?.id ? user.brand : null);
+  const logoUrl = (activeBrand as any)?.logoUrl;
+  const brandName =
+    activeBrand?.name ||
+    user?.brand?.name ||
+    (user?.firstName ? `${user.firstName}'s Store` : 'Your Store');
+  const brandSlug = activeBrand?.slug || user?.brand?.slug || '';
+
+  const displayName =
+    `${user?.firstName || ''} ${user?.lastName || ''}`.trim() ||
+    user?.email?.split('@')[0] ||
+    'Store Owner';
+
+  const avatarChar =
+    user?.firstName?.charAt(0)?.toUpperCase() ||
+    user?.email?.charAt(0)?.toUpperCase() ||
+    'S';
 
   const navLinks = [
     {
@@ -89,27 +104,29 @@ export default function ShopifyShell({ brand, children }: ShopifyShellProps) {
         <div className={styles.storeHeader}>
           <div className={styles.storeBadge}>
             <div className={styles.storeIcon}>
-              {brand?.logoUrl ? (
-                <img src={brand.logoUrl} alt={brandName} />
+              {logoUrl ? (
+                <img src={logoUrl} alt={brandName} />
               ) : (
-                brandName.charAt(0)
+                brandName.charAt(0).toUpperCase()
               )}
             </div>
             <div className={styles.storeTitleGroup}>
               <div className={styles.storeName} title={brandName}>{brandName}</div>
-              <div className={styles.storePlan}>Makaura Seller</div>
+              <div className={styles.storePlan}>Makaura Verified Seller</div>
             </div>
           </div>
-          <Link
-            href={`/brands/${brandSlug}`}
-            target="_blank"
-            className={styles.viewStoreIcon}
-            title="View store on Makaura"
-          >
-            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </Link>
+          {brandSlug ? (
+            <Link
+              href={`/brands/${brandSlug}`}
+              target="_blank"
+              className={styles.viewStoreIcon}
+              title={`View ${brandName} on Makaura`}
+            >
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </Link>
+          ) : null}
         </div>
 
         <nav className={styles.nav}>
@@ -131,9 +148,29 @@ export default function ShopifyShell({ brand, children }: ShopifyShellProps) {
         <div className={styles.userSection}>
           <div className={styles.userBadge}>
             <div className={styles.userAvatar}>
-              {user?.firstName?.charAt(0) || 'S'}
+              {avatarChar}
             </div>
-            <span className={styles.userName}>{user?.firstName || 'Store Owner'}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+              <span className={styles.userName} title={displayName}>
+                {displayName}
+              </span>
+              {user?.email && (
+                <span
+                  title={user.email}
+                  style={{
+                    fontSize: '0.6875rem',
+                    color: 'rgba(255, 255, 255, 0.45)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '120px',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {user.email}
+                </span>
+              )}
+            </div>
           </div>
           <button
             onClick={() => logout().then(() => router.push('/brand/login'))}
@@ -157,22 +194,24 @@ export default function ShopifyShell({ brand, children }: ShopifyShellProps) {
             </svg>
             <input
               type="text"
-              placeholder="Search products, orders..."
+              placeholder={`Search in ${brandName}...`}
               className={styles.searchInput}
             />
           </div>
 
           <div className={styles.topBarRight}>
-            <Link
-              href={`/brands/${brandSlug}`}
-              target="_blank"
-              className={styles.onlineStorePill}
-            >
-              <span>View Online Store</span>
-              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </Link>
+            {brandSlug ? (
+              <Link
+                href={`/brands/${brandSlug}`}
+                target="_blank"
+                className={styles.onlineStorePill}
+              >
+                <span>View Online Store</span>
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </Link>
+            ) : null}
           </div>
         </header>
 
@@ -184,4 +223,3 @@ export default function ShopifyShell({ brand, children }: ShopifyShellProps) {
     </div>
   );
 }
-

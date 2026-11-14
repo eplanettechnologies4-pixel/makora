@@ -119,7 +119,7 @@ export default function BrandBannerPage() {
     );
   }
 
-  const brandSlug = brand?.slug || 'adans-libas';
+  const brandSlug = brand?.slug || user?.brand?.slug || '';
 
   return (
     <ShopifyShell brand={brand}>
@@ -296,7 +296,7 @@ export default function BrandBannerPage() {
                 type="text"
                 disabled
                 className={styles.input}
-                value={brand?.name || "Adan's Libas"}
+                value={brand?.name || user?.brand?.name || ''}
                 style={{ background: '#f6f6f7', color: '#6d7175' }}
               />
             </div>

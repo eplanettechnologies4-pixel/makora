@@ -10,6 +10,16 @@ import {
   maskIban,
   sanitizeAuditMetadata,
 } from './crypto';
+import {
+  type MarketplaceBrandCard,
+  type MarketplaceCategoryCircle,
+  type MarketplaceProductCard,
+  DUMMY_STORE_BRANDS,
+  DUMMY_CATEGORY_CIRCLES,
+  DUMMY_FEATURED_PRODUCTS,
+} from '../dummyCatalog';
+
+export type { MarketplaceBrandCard, MarketplaceCategoryCircle, MarketplaceProductCard };
 
 export type ActionResult<T> =
   | { ok: true; data: T }
@@ -1599,6 +1609,19 @@ import {
   StoreCustomer,
 } from '../store-data/store-catalog';
 
+function isUuidString(val?: string | null): boolean {
+  if (!val || typeof val !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val);
+}
+
+function cleanSlug(text: string): string {
+  return (text || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export async function getMyBrandProductsAction(): Promise<ActionResult<StoreProduct[]>> {
   const auth = await requireAuthenticatedUser();
   if (!auth.ok) return auth;
@@ -1606,9 +1629,47 @@ export async function getMyBrandProductsAction(): Promise<ActionResult<StoreProd
   const brandRes = await getMyBrandAction();
   if (!brandRes.ok) return brandRes;
 
-  const brandSlug = brandRes.data?.slug;
-  const products = getStoreProducts(brandSlug);
-  return { ok: true, data: products };
+  const brand = brandRes.data;
+  const admin = createAdminSupabaseClient();
+  let dbProducts: StoreProduct[] = [];
+
+  if (admin) {
+    const { data: prods, error } = await admin
+      .from('products')
+      .select('*, category:categories(id, name, slug)')
+      .eq('brandId', brand.id)
+      .order('createdAt', { ascending: false });
+
+    if (!error && prods && prods.length > 0) {
+      dbProducts = prods.map((p: any) => ({
+        id: p.id,
+        brandSlug: brand.slug,
+        brandName: brand.name,
+        title: p.title,
+        slug: p.slug,
+        category: p.category?.slug || 'general',
+        categoryLabel: p.category?.name || 'General',
+        sku: p.sku || '',
+        price: Number(p.basePrice) || 0,
+        compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : undefined,
+        costPrice: p.costPrice ? Number(p.costPrice) : undefined,
+        stock: p.stockQuantity ?? 10,
+        status: (p.status as any) || 'ACTIVE',
+        images: Array.isArray(p.images) ? p.images : [],
+        description: p.description || '',
+        rating: Number(p.rating) || 5.0,
+        reviewCount: p.reviewCount || 0,
+        createdAt: p.createdAt,
+      }));
+    }
+  }
+
+  if (dbProducts.length > 0) {
+    return { ok: true, data: dbProducts };
+  }
+
+  const localProducts = getStoreProducts(brand.slug);
+  return { ok: true, data: localProducts };
 }
 
 export async function saveBrandProductAction(
@@ -1621,22 +1682,141 @@ export async function saveBrandProductAction(
   if (!brandRes.ok) return brandRes;
 
   const brand = brandRes.data;
-  const saved = saveStoreProduct({
+  const admin = createAdminSupabaseClient();
+
+  let dbSavedProduct: any = null;
+  let assignedCategoryId: string | null = null;
+  const categorySlug = product.category ? cleanSlug(product.category) : 'general';
+  const categoryTitle =
+    product.categoryLabel ||
+    categorySlug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+  if (admin) {
+    // 1. Resolve or create category in public.categories for this brand
+    if (categorySlug) {
+      const { data: existingCat } = await admin
+        .from('categories')
+        .select('id, name, slug')
+        .eq('brandId', brand.id)
+        .eq('slug', categorySlug)
+        .maybeSingle();
+
+      if (existingCat) {
+        assignedCategoryId = existingCat.id;
+      } else {
+        const { data: newCat } = await admin
+          .from('categories')
+          .insert({
+            brandId: brand.id,
+            name: categoryTitle,
+            slug: categorySlug,
+            description: `${categoryTitle} collection`,
+            isActive: true,
+          })
+          .select('id')
+          .single();
+
+        if (newCat) {
+          assignedCategoryId = newCat.id;
+        }
+      }
+    }
+
+    // 2. Prepare product payload for public.products
+    const prodSlug = product.slug
+      ? cleanSlug(product.slug)
+      : `${cleanSlug(product.title)}-${Date.now().toString(36)}`;
+
+    const productPayload = {
+      brandId: brand.id,
+      categoryId: assignedCategoryId,
+      title: product.title.trim(),
+      slug: prodSlug,
+      sku: product.sku?.trim() || `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
+      description: product.description || '',
+      basePrice: Number(product.price) || 0,
+      compareAtPrice: product.compareAtPrice ? Number(product.compareAtPrice) : null,
+      costPrice: product.costPrice ? Number(product.costPrice) : null,
+      stockQuantity: product.stock !== undefined ? Number(product.stock) : 10,
+      status: product.status === 'DRAFT' ? 'DRAFT' : 'ACTIVE',
+      images: Array.isArray(product.images) && product.images.length > 0 ? product.images : [],
+    };
+
+    if (product.id && isUuidString(product.id)) {
+      const { data: updated, error: updErr } = await admin
+        .from('products')
+        .update({
+          ...productPayload,
+          updatedAt: new Date().toISOString(),
+        })
+        .eq('id', product.id)
+        .eq('brandId', brand.id)
+        .select('*, category:categories(id, name, slug)')
+        .single();
+
+      if (!updErr && updated) {
+        dbSavedProduct = updated;
+      }
+    }
+
+    if (!dbSavedProduct) {
+      const { data: inserted, error: insErr } = await admin
+        .from('products')
+        .insert(productPayload)
+        .select('*, category:categories(id, name, slug)')
+        .single();
+
+      if (insErr) {
+        console.error('Failed to insert product into Supabase:', insErr);
+      } else {
+        dbSavedProduct = inserted;
+      }
+    }
+  }
+
+  // Dual-write to local catalog to ensure full system parity
+  const localSaved = saveStoreProduct({
     ...product,
+    id: dbSavedProduct?.id || product.id,
     brandSlug: brand.slug,
     brandName: brand.name,
+    category: categorySlug,
+    categoryLabel: categoryTitle,
   });
+
+  const finalProduct: StoreProduct = dbSavedProduct
+    ? {
+        id: dbSavedProduct.id,
+        brandSlug: brand.slug,
+        brandName: brand.name,
+        title: dbSavedProduct.title,
+        slug: dbSavedProduct.slug,
+        category: dbSavedProduct.category?.slug || categorySlug,
+        categoryLabel: dbSavedProduct.category?.name || categoryTitle,
+        sku: dbSavedProduct.sku || '',
+        price: Number(dbSavedProduct.basePrice) || 0,
+        compareAtPrice: dbSavedProduct.compareAtPrice ? Number(dbSavedProduct.compareAtPrice) : undefined,
+        costPrice: dbSavedProduct.costPrice ? Number(dbSavedProduct.costPrice) : undefined,
+        stock: dbSavedProduct.stockQuantity ?? 10,
+        status: dbSavedProduct.status as any,
+        images: Array.isArray(dbSavedProduct.images) ? dbSavedProduct.images : [],
+        description: dbSavedProduct.description || '',
+        rating: Number(dbSavedProduct.rating) || 5.0,
+        reviewCount: dbSavedProduct.reviewCount || 0,
+        createdAt: dbSavedProduct.createdAt,
+      }
+    : localSaved;
 
   await writeAuditLog({
     userId: auth.data.authUserId,
     brandId: brand.id,
     action: product.id ? 'PRODUCT_UPDATED' : 'PRODUCT_CREATED',
     entity: 'Product',
-    entityId: saved.id,
-    metadata: { title: saved.title, sku: saved.sku, price: saved.price },
+    entityId: finalProduct.id,
+    metadata: { title: finalProduct.title, sku: finalProduct.sku, price: finalProduct.price },
   });
 
-  return { ok: true, data: saved };
+  return { ok: true, data: finalProduct };
 }
 
 export async function deleteBrandProductAction(id: string): Promise<ActionResult<{ success: boolean }>> {
@@ -1645,15 +1825,22 @@ export async function deleteBrandProductAction(id: string): Promise<ActionResult
 
   const brandRes = await getMyBrandAction();
   if (!brandRes.ok) return brandRes;
+  const brand = brandRes.data;
 
-  const success = deleteStoreProduct(id);
-  if (!success) {
-    return { ok: false, error: 'Product not found or could not be deleted', status: 404 };
+  const admin = createAdminSupabaseClient();
+  if (admin) {
+    await admin
+      .from('products')
+      .delete()
+      .eq('id', id)
+      .eq('brandId', brand.id);
   }
+
+  deleteStoreProduct(id);
 
   await writeAuditLog({
     userId: auth.data.authUserId,
-    brandId: brandRes.data.id,
+    brandId: brand.id,
     action: 'PRODUCT_DELETED',
     entity: 'Product',
     entityId: id,
@@ -1667,9 +1854,50 @@ export async function getMyBrandCategoriesAction(): Promise<ActionResult<StoreCa
   if (!auth.ok) return auth;
 
   const brandRes = await getMyBrandAction();
-  const brandSlug = brandRes.ok ? brandRes.data?.slug : undefined;
-  const categories = getStoreCategories(brandSlug);
-  return { ok: true, data: categories };
+  if (!brandRes.ok) return brandRes;
+  const brand = brandRes.data;
+
+  const admin = createAdminSupabaseClient();
+  let dbCategories: StoreCategory[] = [];
+
+  if (admin) {
+    const { data: cats } = await admin
+      .from('categories')
+      .select('id, name, slug, description, isActive')
+      .eq('brandId', brand.id)
+      .eq('isActive', true)
+      .order('createdAt', { ascending: true });
+
+    if (cats && cats.length > 0) {
+      const { data: prods } = await admin
+        .from('products')
+        .select('categoryId')
+        .eq('brandId', brand.id);
+
+      const countMap: Record<string, number> = {};
+      prods?.forEach((p: any) => {
+        if (p.categoryId) {
+          countMap[p.categoryId] = (countMap[p.categoryId] || 0) + 1;
+        }
+      });
+
+      dbCategories = cats.map((c: any) => ({
+        id: c.id,
+        brandSlug: brand.slug,
+        name: c.name,
+        slug: c.slug,
+        description: c.description || undefined,
+        productCount: countMap[c.id] || 0,
+      }));
+    }
+  }
+
+  if (dbCategories.length > 0) {
+    return { ok: true, data: dbCategories };
+  }
+
+  const localCats = getStoreCategories(brand.slug);
+  return { ok: true, data: localCats };
 }
 
 export async function saveBrandCategoryAction(input: {
@@ -1681,19 +1909,98 @@ export async function saveBrandCategoryAction(input: {
   if (!auth.ok) return auth;
 
   const brandRes = await getMyBrandAction();
-  const brandSlug = brandRes.ok ? brandRes.data?.slug : undefined;
+  if (!brandRes.ok) return brandRes;
+  const brand = brandRes.data;
 
-  const saved = saveStoreCategory({
+  const admin = createAdminSupabaseClient();
+  const slug = cleanSlug(input.slug || input.name);
+  let savedCat: StoreCategory;
+
+  if (admin) {
+    const { data: existing } = await admin
+      .from('categories')
+      .select('id')
+      .eq('brandId', brand.id)
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (existing) {
+      const { data: updated } = await admin
+        .from('categories')
+        .update({
+          name: input.name.trim(),
+          description: input.description?.trim() || null,
+          updatedAt: new Date().toISOString(),
+        })
+        .eq('id', existing.id)
+        .select()
+        .single();
+
+      savedCat = {
+        id: updated?.id || existing.id,
+        brandSlug: brand.slug,
+        name: input.name.trim(),
+        slug,
+        description: input.description,
+        productCount: 0,
+      };
+    } else {
+      const { data: inserted, error: insErr } = await admin
+        .from('categories')
+        .insert({
+          brandId: brand.id,
+          name: input.name.trim(),
+          slug,
+          description: input.description?.trim() || null,
+          isActive: true,
+        })
+        .select()
+        .single();
+
+      if (insErr) {
+        console.error('Failed to insert Supabase category:', insErr);
+      }
+
+      savedCat = {
+        id: inserted?.id || `cat-${Date.now().toString(36)}`,
+        brandSlug: brand.slug,
+        name: input.name.trim(),
+        slug,
+        description: input.description,
+        productCount: 0,
+      };
+    }
+  } else {
+    savedCat = saveStoreCategory({
+      ...input,
+      brandSlug: brand.slug,
+    });
+  }
+
+  saveStoreCategory({
     ...input,
-    brandSlug,
+    brandSlug: brand.slug,
   });
 
-  return { ok: true, data: saved };
+  return { ok: true, data: savedCat };
 }
 
 export async function deleteBrandCategoryAction(slug: string): Promise<ActionResult<{ success: boolean }>> {
   const auth = await requireAuthenticatedUser();
   if (!auth.ok) return auth;
+
+  const brandRes = await getMyBrandAction();
+  if (!brandRes.ok) return brandRes;
+  const brand = brandRes.data;
+
+  const admin = createAdminSupabaseClient();
+  if (admin) {
+    await admin
+      .from('categories')
+      .delete()
+      .eq('brandId', brand.id)
+      .eq('slug', slug);
+  }
 
   const success = deleteStoreCategory(slug);
   return { ok: true, data: { success } };
@@ -1706,9 +2013,50 @@ export async function getMyBrandOrdersAction(): Promise<ActionResult<StoreOrder[
   const brandRes = await getMyBrandAction();
   if (!brandRes.ok) return brandRes;
 
-  const brandSlug = brandRes.data?.slug;
-  const orders = getStoreOrders(brandSlug);
-  return { ok: true, data: orders };
+  const brand = brandRes.data;
+  const brandSlug = brand.slug;
+
+  const admin = createAdminSupabaseClient();
+  let dbOrders: StoreOrder[] = [];
+
+  if (admin) {
+    const { data: sOrders } = await admin
+      .from('seller_orders')
+      .select('*')
+      .eq('brandId', brand.id)
+      .order('createdAt', { ascending: false });
+
+    if (sOrders && sOrders.length > 0) {
+      dbOrders = sOrders.map((o: any) => ({
+        id: o.id,
+        orderNumber: o.orderNumber,
+        brandSlug: brand.slug,
+        brandName: brand.name,
+        customerName: o.customerName,
+        customerEmail: o.customerEmail || '',
+        customerPhone: o.customerPhone || '',
+        shippingAddress: o.shippingAddress,
+        city: o.shippingCity,
+        items: Array.isArray(o.items) ? o.items : [],
+        subtotal: Number(o.subtotal) || 0,
+        shippingFee: Number(o.shippingFee) || 0,
+        total: Number(o.totalAmount) || 0,
+        paymentMethod: (o.paymentMethod as any) || 'COD',
+        codStatus: (o.codStatus as any) || 'PENDING',
+        fulfillmentStatus: (o.fulfillmentStatus as any) || 'PENDING',
+        courierName: o.courierName,
+        trackingNumber: o.trackingNumber,
+        createdAt: o.createdAt,
+      }));
+    }
+  }
+
+  if (dbOrders.length > 0) {
+    return { ok: true, data: dbOrders };
+  }
+
+  const localOrders = getStoreOrders(brandSlug);
+  return { ok: true, data: localOrders };
 }
 
 export async function updateSellerOrderStatusAction(
@@ -1750,6 +2098,8 @@ export async function getPublicBrandStorefrontAction(slug: string): Promise<Acti
 }>> {
   const admin = createAdminSupabaseClient();
   let brandData: any = null;
+  let dbProducts: StoreProduct[] = [];
+  let dbCategories: StoreCategory[] = [];
 
   if (admin) {
     const { data: dbBrand } = await admin
@@ -1760,19 +2110,111 @@ export async function getPublicBrandStorefrontAction(slug: string): Promise<Acti
 
     if (dbBrand) {
       brandData = dbBrand;
+
+      // 1. Fetch products for this brand from Supabase
+      const { data: prods } = await admin
+        .from('products')
+        .select('*, category:categories(id, name, slug)')
+        .eq('brandId', dbBrand.id)
+        .eq('status', 'ACTIVE')
+        .order('createdAt', { ascending: false });
+
+      if (prods && prods.length > 0) {
+        dbProducts = prods.map((p: any) => ({
+          id: p.id,
+          brandSlug: dbBrand.slug,
+          brandName: dbBrand.name,
+          title: p.title,
+          slug: p.slug,
+          category: p.category?.slug || 'general',
+          categoryLabel: p.category?.name || 'General',
+          sku: p.sku || '',
+          price: Number(p.basePrice) || 0,
+          compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : undefined,
+          costPrice: p.costPrice ? Number(p.costPrice) : undefined,
+          stock: p.stockQuantity ?? 10,
+          status: p.status as any,
+          images: Array.isArray(p.images) ? p.images : [],
+          description: p.description || '',
+          rating: Number(p.rating) || 5.0,
+          reviewCount: p.reviewCount || 0,
+          createdAt: p.createdAt,
+        }));
+      }
+
+      // 2. Fetch categories for this brand from Supabase
+      const { data: cats } = await admin
+        .from('categories')
+        .select('id, name, slug, description, isActive')
+        .eq('brandId', dbBrand.id)
+        .eq('isActive', true)
+        .order('createdAt', { ascending: true });
+
+      if (cats && cats.length > 0) {
+        dbCategories = cats.map((c: any) => ({
+          id: c.id,
+          brandSlug: dbBrand.slug,
+          name: c.name,
+          slug: c.slug,
+          description: c.description || undefined,
+          productCount: dbProducts.filter((p) => p.category === c.slug).length,
+        }));
+      }
     }
   }
 
-  // Fallback defaults for verified brands
+  // Fallback to local catalog if no Supabase products exist for this slug
+  const catalogProducts = getStoreProducts(slug);
+  const finalProducts = dbProducts.length > 0 ? dbProducts : catalogProducts;
+
+  // Categories: if DB categories exist, use them.
+  // Otherwise derive from products or fallback to store catalog
+  let finalCategories: StoreCategory[] = dbCategories;
+  if (finalCategories.length === 0) {
+    if (finalProducts.length > 0) {
+      const categoryMap = new Map<string, StoreCategory>();
+      finalProducts.forEach((p) => {
+        const catSlug = p.category || 'general';
+        const catName =
+          p.categoryLabel ||
+          catSlug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        if (!categoryMap.has(catSlug)) {
+          categoryMap.set(catSlug, {
+            id: `cat-${catSlug}`,
+            brandSlug: slug,
+            name: catName,
+            slug: catSlug,
+            productCount: 1,
+          });
+        } else {
+          categoryMap.get(catSlug)!.productCount =
+            (categoryMap.get(catSlug)!.productCount || 0) + 1;
+        }
+      });
+      finalCategories = Array.from(categoryMap.values());
+    } else {
+      finalCategories = getStoreCategories(slug);
+    }
+  } else {
+    finalCategories = finalCategories.map((c) => ({
+      ...c,
+      productCount: finalProducts.filter((p) => p.category === c.slug).length,
+    }));
+  }
+
+  // Brand data fallback
   if (!brandData) {
     if (slug === 'adans-libas') {
       brandData = {
         name: "Adan's Libas",
         slug: 'adans-libas',
         description: 'Luxury Embroidered & Luxury Pret Couture Collection 2026',
-        story: "Adan's Libas brings timeless Pakistani craftsmanship, hand-embroidered silhouettes, and contemporary luxury design together for the modern woman.",
-        logoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-        bannerUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1920&q=80',
+        story:
+          "Adan's Libas brings timeless Pakistani craftsmanship, hand-embroidered silhouettes, and contemporary luxury design together for the modern woman.",
+        logoUrl:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+        bannerUrl:
+          'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1920&q=80',
         city: 'Lahore',
         country: 'Pakistan',
         websiteUrl: 'https://adanslibas.pk',
@@ -1784,23 +2226,22 @@ export async function getPublicBrandStorefrontAction(slug: string): Promise<Acti
         slug,
         description: 'Exclusive Independent Fashion & Beauty Atelier',
         story: 'Handcrafted luxury, pure materials, and bespoke formulations.',
-        logoUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
-        bannerUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1920&q=80',
+        logoUrl:
+          'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+        bannerUrl:
+          'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1920&q=80',
         city: 'Lahore',
         country: 'Pakistan',
       };
     }
   }
 
-  const products = getStoreProducts(slug);
-  const categories = getStoreCategories(slug);
-
   return {
     ok: true,
     data: {
       brand: brandData,
-      categories,
-      products,
+      categories: finalCategories,
+      products: finalProducts,
     },
   };
 }
@@ -2378,6 +2819,319 @@ export async function placeCustomerOrderAction(input: {
 
   const order = createStoreOrder(input);
   return { ok: true, data: order };
+}
+
+// ==============================================================================
+// PUBLIC MARKETPLACE CATALOG: 1-BY-1 REAL REPLACEMENT WITH DUMMY BACKFILL
+// ==============================================================================
+
+
+
+export async function getMarketplaceBrandsAction(targetCount: number = 4): Promise<ActionResult<MarketplaceBrandCard[]>> {
+  const admin = createAdminSupabaseClient();
+  let realBrands: MarketplaceBrandCard[] = [];
+
+  if (admin) {
+    const { data: dbBrands, error } = await admin
+      .from('brands')
+      .select('id, name, slug, description, story, logoUrl, bannerUrl, status, city, country, businessType')
+      .eq('status', 'APPROVED')
+      .order('createdAt', { ascending: false });
+
+    if (!error && dbBrands && dbBrands.length > 0) {
+      const { data: prodCounts } = await admin
+        .from('products')
+        .select('brandId')
+        .eq('status', 'ACTIVE');
+
+      const countMap: Record<string, number> = {};
+      prodCounts?.forEach((p: any) => {
+        if (p.brandId) countMap[p.brandId] = (countMap[p.brandId] || 0) + 1;
+      });
+
+      realBrands = dbBrands.map((b: any) => ({
+        name: b.name,
+        slug: b.slug,
+        origin: b.city ? `${b.city}, PK` : 'Pakistan',
+        category: b.businessType ? b.businessType.replace(/_/g, ' ') : 'Verified Brand',
+        focus:
+          b.description ||
+          b.story ||
+          'Handcrafted luxury, bespoke formulations, and authentic Pakistani craftsmanship.',
+        productCount: countMap[b.id] || 0,
+        image:
+          b.bannerUrl ||
+          b.logoUrl ||
+          'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=700&q=80',
+        logoUrl: b.logoUrl,
+        isReal: true,
+      }));
+    }
+  }
+
+  // 1-by-1 replacement: real brands take the front slots, remaining slots backfilled by dummy cards
+  const realKeys = new Set(realBrands.map((r) => r.slug));
+  const availableDummies = DUMMY_STORE_BRANDS.filter((d) => !realKeys.has(d.slug));
+  const neededDummiesCount = Math.max(0, targetCount - realBrands.length);
+  const backfill = availableDummies.slice(0, neededDummiesCount);
+
+  return { ok: true, data: [...realBrands, ...backfill] };
+}
+
+
+
+export async function getMarketplaceCategoriesAction(targetCount: number = 14): Promise<ActionResult<MarketplaceCategoryCircle[]>> {
+  const admin = createAdminSupabaseClient();
+  let realCategories: MarketplaceCategoryCircle[] = [];
+
+  const CATEGORY_IMAGE_PRESETS = [
+    'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=95',
+    'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=800&q=95',
+    'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=95',
+    'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=800&q=95',
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=95',
+    'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=95',
+    'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=800&q=95',
+    'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=800&q=95',
+  ];
+
+  if (admin) {
+    const { data: dbCats } = await admin
+      .from('categories')
+      .select('id, name, slug, iconUrl, isActive')
+      .eq('isActive', true)
+      .order('createdAt', { ascending: false });
+
+    if (dbCats && dbCats.length > 0) {
+      const seen = new Set<string>();
+      dbCats.forEach((c: any, idx: number) => {
+        if (!seen.has(c.slug)) {
+          seen.add(c.slug);
+          realCategories.push({
+            id: c.slug,
+            name: c.name,
+            image: c.iconUrl || CATEGORY_IMAGE_PRESETS[idx % CATEGORY_IMAGE_PRESETS.length],
+            href: `/categories/${c.slug}`,
+            isReal: true,
+          });
+        }
+      });
+    }
+  }
+
+  // 1-by-1 replacement: real categories take the front slots, remaining slots backfilled by dummy circles
+  const realKeys = new Set(realCategories.map((r) => r.id));
+  const availableDummies = DUMMY_CATEGORY_CIRCLES.filter((d) => !realKeys.has(d.id));
+  const neededDummiesCount = Math.max(0, targetCount - realCategories.length);
+  const backfill = availableDummies.slice(0, neededDummiesCount);
+
+  return { ok: true, data: [...realCategories, ...backfill] };
+}
+
+
+
+export async function getMarketplaceProductsAction(options?: {
+  category?: string;
+  query?: string;
+  limit?: number;
+}): Promise<ActionResult<MarketplaceProductCard[]>> {
+  const admin = createAdminSupabaseClient();
+  let realProducts: MarketplaceProductCard[] = [];
+  const targetCount = options?.limit || 8;
+
+  if (admin) {
+    let query = admin
+      .from('products')
+      .select('*, brand:brands(id, name, slug), category:categories(id, name, slug)')
+      .eq('status', 'ACTIVE')
+      .order('createdAt', { ascending: false });
+
+    const { data: dbProds, error } = await query;
+    if (!error && dbProds && dbProds.length > 0) {
+      realProducts = dbProds.map((p: any) => {
+        const discountPercent =
+          p.compareAtPrice && p.compareAtPrice > p.basePrice
+            ? `${Math.round(((p.compareAtPrice - p.basePrice) / p.compareAtPrice) * 100)}% OFF`
+            : undefined;
+
+        return {
+          id: p.id,
+          name: p.title,
+          brandName: p.brand?.name || 'Verified Partner',
+          brandSlug: p.brand?.slug || '',
+          price: Number(p.basePrice) || 0,
+          compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : undefined,
+          rating: Number(p.rating) || 5.0,
+          reviewCount: p.reviewCount || 1,
+          badge: discountPercent || 'Verified Formulation',
+          category: p.category?.slug || 'skincare',
+          image:
+            Array.isArray(p.images) && p.images.length > 0
+              ? p.images[0]
+              : 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=700&q=80',
+          href: `/product/${p.id}`,
+          isReal: true,
+        };
+      });
+    }
+  }
+
+  // Filter dummy products if category or query is specified
+  let filteredDummies = DUMMY_FEATURED_PRODUCTS;
+  if (options?.category && options.category !== 'all') {
+    filteredDummies = filteredDummies.filter((d) => d.category === options.category);
+  }
+  if (options?.query) {
+    const q = options.query.toLowerCase();
+    filteredDummies = filteredDummies.filter(
+      (d) => d.name.toLowerCase().includes(q) || d.brandName.toLowerCase().includes(q)
+    );
+  }
+
+  // Also filter real products if query is specified
+  if (options?.category && options.category !== 'all') {
+    realProducts = realProducts.filter((r) => r.category === options.category);
+  }
+  if (options?.query) {
+    const q = options.query.toLowerCase();
+    realProducts = realProducts.filter(
+      (r) => r.name.toLowerCase().includes(q) || r.brandName.toLowerCase().includes(q)
+    );
+  }
+
+  // 1-by-1 replacement: real products take the front slots, remaining slots backfilled by dummy products
+  const realKeys = new Set(realProducts.map((r) => r.id));
+  const availableDummies = filteredDummies.filter((d) => !realKeys.has(d.id));
+  const neededDummiesCount = Math.max(0, targetCount - realProducts.length);
+  const backfill = availableDummies.slice(0, neededDummiesCount);
+
+  return { ok: true, data: [...realProducts, ...backfill] };
+}
+
+export async function getMarketplaceProductByIdAction(id: string): Promise<ActionResult<any>> {
+  const admin = createAdminSupabaseClient();
+  if (admin && isUuidString(id)) {
+    const { data: p } = await admin
+      .from('products')
+      .select('*, brand:brands(id, name, slug, city, story, description, logoUrl), category:categories(id, name, slug)')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (p) {
+      const images =
+        Array.isArray(p.images) && p.images.length > 0
+          ? p.images
+          : ['https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80'];
+
+      const price = Number(p.basePrice) || 0;
+      const comparePrice = p.compareAtPrice ? Number(p.compareAtPrice) : undefined;
+
+      const categorySlug = p.category?.slug || 'skincare';
+      const categoryLabel = p.category?.name || 'Luxury Pret & Beauty';
+
+      const details = {
+        id: p.id,
+        name: p.title,
+        brandName: p.brand?.name || 'Verified Brand',
+        brandSlug: p.brand?.slug || '',
+        brandRating: 4.9,
+        brandItemsSold: 120,
+        sku: p.sku || `MKR-${p.id.slice(0, 6).toUpperCase()}`,
+        origin: p.brand?.city ? `${p.brand.city}, PK` : 'Pakistan',
+        price,
+        compareAtPrice: comparePrice,
+        rating: Number(p.rating) || 5.0,
+        reviewCount: p.reviewCount || 1,
+        badge: comparePrice && comparePrice > price ? 'Special Price' : 'Clean Halal',
+        category: categorySlug,
+        categoryLabel: categoryLabel,
+        tagline: p.shortDescription || p.description?.slice(0, 100) || 'Handcrafted luxury creation',
+        description: p.description || 'Authentic formulation from certified independent artisans.',
+        gallery: images,
+        images: images,
+        sizes: [
+          { label: 'Standard Edition', volume: '1 Unit', price, isPopular: true },
+        ],
+        videos: [],
+        specs: [
+          { label: 'Origin', value: p.brand?.city ? `${p.brand.city}, PK` : 'Pakistan' },
+          { label: 'Craftsmanship', value: '100% Authentic Handcrafted' },
+          { label: 'Availability', value: (p.stockQuantity ?? 10) > 0 ? 'In Stock' : 'Pre-Order' },
+          { label: 'Delivery', value: 'Nationwide Cash on Delivery (COD)' },
+        ],
+        benefits: [
+          'Certified ethical manufacturing in Pakistan',
+          'Pure, authentic ingredients and quality assurance',
+          'Nationwide Cash on Delivery (COD) eligible',
+          'Direct delivery from the brand atelier',
+        ],
+        ritualBullets: [
+          'Certified ethical manufacturing in Pakistan',
+          'Pure, authentic ingredients and quality assurance',
+          'Nationwide Cash on Delivery (COD) eligible',
+          'Direct delivery from the brand atelier',
+        ],
+        keyIngredients: [
+          { name: 'Pure Artisan Formulation', role: 'Active enrichment and premium finish' },
+        ],
+        howToUse: [
+          'Follow manufacturer usage recommendations on outer pack.',
+          'Store in a cool, dry place away from direct sunlight.',
+        ],
+        fullIngredients: p.description || 'Pure artisan materials and verified ingredients.',
+        inci: p.description || 'Pure authentic materials & verified botanical extracts.',
+        note: 'Handcrafted in limited small batches.',
+        brandDetails: {
+          story: p.brand?.story || p.brand?.description || 'Independent Pakistani luxury and beauty house.',
+          established: '2026',
+          hq: p.brand?.city || 'Pakistan',
+          formulatorNotes: 'Handcrafted in limited small batches.',
+        },
+        reviews: [],
+        stockStatus: (p.stockQuantity ?? 10) > 0 ? 'IN_STOCK' : 'OUT_OF_STOCK',
+        isReal: true,
+      };
+
+      return { ok: true, data: details };
+    }
+  }
+
+  const localProd = getStoreProductById(id);
+  if (localProd) {
+    const details = {
+      id: localProd.id,
+      name: localProd.title,
+      brandName: localProd.brandName,
+      brandSlug: localProd.brandSlug,
+      origin: 'Lahore, PK',
+      price: localProd.price,
+      compareAtPrice: localProd.compareAtPrice,
+      rating: localProd.rating || 4.9,
+      reviewCount: localProd.reviewCount || 12,
+      badge: 'Bestseller',
+      category: localProd.category,
+      tagline: localProd.description.slice(0, 100),
+      description: localProd.description,
+      gallery: localProd.images,
+      sizes: [{ label: 'Standard', volume: '1 Unit', price: localProd.price, isPopular: true }],
+      benefits: ['Pure craftsmanship', 'Nationwide COD delivery'],
+      keyIngredients: [{ name: 'Artisan Textiles & Extracts', role: 'Premium finish' }],
+      howToUse: ['Follow pack instructions.'],
+      fullIngredients: localProd.description,
+      brandDetails: {
+        story: `${localProd.brandName} is a verified partner on Makaura.`,
+        established: '2026',
+        hq: 'Lahore, PK',
+        formulatorNotes: 'Authentic creation.',
+      },
+      reviews: [],
+      stockStatus: 'IN_STOCK',
+      isReal: true,
+    };
+    return { ok: true, data: details };
+  }
+
+  return { ok: false, error: 'Product not found', status: 404 };
 }
 
 

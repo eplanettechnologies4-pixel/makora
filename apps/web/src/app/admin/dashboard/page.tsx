@@ -303,7 +303,12 @@ export default function AdminDashboardPage() {
           <div className={styles.sectionHeader}>
             <div>
               <h2 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>📦 Incoming Orders for Central Dispatch</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#0284c7' }}>
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                  <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+                <span>Incoming Orders for Central Dispatch</span>
                 <span style={{ fontSize: '0.72rem', backgroundColor: '#e4f8ec', color: '#108043', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: 600 }}>
                   Makaura Logistics Fulfillment
                 </span>
@@ -360,8 +365,12 @@ export default function AdminDashboardPage() {
                           </svg>
                           <span>Store: {ord.brandName}</span>
                         </div>
-                        <div className={styles.storeOwnerText}>
-                          👤 Owner: <strong>{ord.storeOwnerName}</strong>
+                        <div className={styles.storeOwnerText} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
+                          <span>Owner: <strong>{ord.storeOwnerName}</strong></span>
                         </div>
                         <div className={styles.ownerEmailMuted}>{ord.storeOwnerEmail}</div>
                       </div>
@@ -370,8 +379,12 @@ export default function AdminDashboardPage() {
                     {/* Customer */}
                     <td className={styles.td}>
                       <p style={{ margin: 0, fontWeight: 500, color: '#111213' }}>{ord.customerName}</p>
-                      <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.75rem', color: '#6d7175' }}>
-                        📍 {ord.city}
+                      <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.75rem', color: '#6d7175', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                          <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <span>{ord.city}</span>
                       </p>
                     </td>
 

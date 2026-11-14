@@ -7,6 +7,7 @@ import {
   loginAction,
   logoutAction,
 } from '../lib/supabase/actions';
+import { createBrowserSupabaseClient } from '../lib/supabase/client';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -62,6 +63,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async (): Promise<void> => {
     try {
+      const browser = createBrowserSupabaseClient();
+      if (browser) {
+        try {
+          await browser.auth.signOut();
+        } catch {}
+      }
       await logoutAction();
     } catch (e) {
       console.warn('Logout notification error', e);

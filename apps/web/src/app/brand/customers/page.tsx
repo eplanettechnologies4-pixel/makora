@@ -7,7 +7,7 @@ import {
   getMyBrandAction,
   getMyBrandCustomersAction,
 } from '../../../lib/supabase/actions';
-import BrandSidebar from '../../../components/brand/BrandSidebar';
+import ShopifyShell from '../../../components/brand/ShopifyShell';
 import styles from './customers.module.css';
 
 export default function BrandCustomersPage() {
@@ -55,10 +55,8 @@ export default function BrandCustomersPage() {
     totalCustomers > 0 ? Math.round(totalCustomerSpend / customers.reduce((s, c) => s + c.totalOrders, 0)) : 0;
 
   return (
-    <div className={styles.layout}>
-      <BrandSidebar brand={brand} />
-
-      <main className={styles.mainContent}>
+    <ShopifyShell brand={brand}>
+      <div>
         <div className={styles.topBar}>
           <div>
             <h1 className={styles.pageTitle}>Customers Directory</h1>
@@ -156,8 +154,8 @@ export default function BrandCustomersPage() {
             </tbody>
           </table>
         </div>
-      </main>
-    </div>
+      </div>
+    </ShopifyShell>
   );
 }
 

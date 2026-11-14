@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useCart } from '../../../context/CartContext';
 import ProductCard, { Product } from '../../../components/storefront/ProductCard';
+import { getMarketplaceProductByIdAction } from '../../../lib/supabase/actions';
 import {
   getProductById,
   StoreOwnerProductDetails,
@@ -134,7 +135,7 @@ export default function SingleProductPage() {
   const router = useRouter();
   const { addItem } = useCart();
   const productId = (params?.id as string) || 'prod-saffron-rose';
-  const product = getProductById(productId);
+  const [product, setProduct] = useState<StoreOwnerProductDetails>(() => getProductById(productId));
 
   // Interactive Gallery Carousel State
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
@@ -158,12 +159,33 @@ export default function SingleProductPage() {
   // Sync state whenever the product route or ID changes
   useEffect(() => {
     setCurrentImgIndex(0);
-    const popIdx = product.sizes.findIndex((s) => s.isPopular);
-    setSelectedSizeIndex(popIdx >= 0 ? popIdx : 0);
     setQuantity(1);
-    setReviewsList(product.reviews || []);
     setShowReviewForm(false);
     setReviewSubmittedNotice(false);
+
+    getMarketplaceProductByIdAction(productId)
+      .then((res) => {
+        if (res.ok && res.data) {
+          setProduct(res.data as StoreOwnerProductDetails);
+          const popIdx = res.data.sizes?.findIndex((s: any) => s.isPopular);
+          setSelectedSizeIndex(popIdx >= 0 ? popIdx : 0);
+          if (res.data.reviews && res.data.reviews.length > 0) {
+            setReviewsList(res.data.reviews);
+          }
+        } else {
+          const fallback = getProductById(productId);
+          setProduct(fallback);
+          const popIdx = fallback.sizes.findIndex((s) => s.isPopular);
+          setSelectedSizeIndex(popIdx >= 0 ? popIdx : 0);
+          setReviewsList(fallback.reviews || []);
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to fetch product by id:', err);
+        const fallback = getProductById(productId);
+        setProduct(fallback);
+      });
+
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }

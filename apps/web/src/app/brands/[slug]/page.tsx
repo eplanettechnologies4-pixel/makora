@@ -43,7 +43,7 @@ export default function BrandStorefrontPage() {
     );
   }
 
-  const brandName = brand?.name || "Adan's Libas";
+  const brandName = brand?.name || (slug ? slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : 'Brand');
   const bannerImage =
     brand?.bannerUrl ||
     'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1920&q=80';
@@ -108,6 +108,17 @@ export default function BrandStorefrontPage() {
 
   return (
     <div className={styles.page}>
+      {/* Platform Trust & Verification Strip */}
+      <div className={styles.platformTrustBar}>
+        <div className={styles.platformTrustInner}>
+          <span>Verified Brand Atelier running on <strong>Makaura Marketplace</strong></span>
+          <span className={styles.trustDivider}>•</span>
+          <span>100% Authentic Guaranteed</span>
+          <span className={styles.trustDivider}>•</span>
+          <span>Nationwide Cash on Delivery (COD)</span>
+        </div>
+      </div>
+
       {brand?.status === 'SUSPENDED' && isAdmin && (
         <div style={{ backgroundColor: '#fef3c7', color: '#92400e', padding: '0.75rem 1.5rem', textAlign: 'center', fontSize: '0.88rem', fontWeight: 600, borderBottom: '1px solid #fde68a' }}>
           ⚠️ Master Admin Preview: This brand is currently <strong>SUSPENDED</strong> from the public marketplace catalog. Buyers will see an unavailable notice.
@@ -173,22 +184,26 @@ export default function BrandStorefrontPage() {
       {/* Sticky Category Filter Navigation Sub-Bar (Fixed Spacing & No Overlap) */}
       <div className={styles.subNavBar}>
         <div className={styles.subNavBarInner}>
-          <div className={styles.categoryPills}>
-            <button
-              className={`${styles.categoryPill} ${selectedCategory === 'ALL' ? styles.categoryPillActive : ''}`}
-              onClick={() => setSelectedCategory('ALL')}
-            >
-              All Products ({products.length})
-            </button>
-            {categories.map((c) => (
+          <div className={styles.pillsScrollWrapper}>
+            <div className={styles.categoryPills}>
               <button
-                key={c.slug}
-                className={`${styles.categoryPill} ${selectedCategory === c.slug ? styles.categoryPillActive : ''}`}
-                onClick={() => setSelectedCategory(c.slug)}
+                className={`${styles.categoryPill} ${selectedCategory === 'ALL' ? styles.categoryPillActive : ''}`}
+                onClick={() => setSelectedCategory('ALL')}
               >
-                {c.name} ({c.productCount || 0})
+                <span>All Products</span>
+                <span className={styles.pillCount}>{products.length}</span>
               </button>
-            ))}
+              {categories.map((c) => (
+                <button
+                  key={c.slug}
+                  className={`${styles.categoryPill} ${selectedCategory === c.slug ? styles.categoryPillActive : ''}`}
+                  onClick={() => setSelectedCategory(c.slug)}
+                >
+                  <span>{c.name}</span>
+                  <span className={styles.pillCount}>{c.productCount || 0}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className={styles.sortGroup}>
@@ -230,7 +245,7 @@ export default function BrandStorefrontPage() {
 
             const badgeText = discountPercent
               ? `${discountPercent}% OFF`
-              : (p.isFeatured ? 'CLEAN HALAL' : undefined);
+              : (p.isFeatured ? 'CLEAN HALAL' : 'CLEAN HALAL');
 
             return (
               <ProductCard
@@ -252,6 +267,15 @@ export default function BrandStorefrontPage() {
               />
             );
           })}
+        </div>
+
+        {/* Bottom Platform Discovery Banner */}
+        <div className={styles.bottomPlatformCard}>
+          <h3>Discover More Independent Creators on Makaura</h3>
+          <p>Explore verified Pakistani haute couture, festive pret, and botanical beauty formulation houses.</p>
+          <Link href="/brands" className={styles.exploreMarketplaceBtn}>
+            Explore All Brands →
+          </Link>
         </div>
       </main>
     </div>

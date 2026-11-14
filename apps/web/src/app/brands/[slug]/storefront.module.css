@@ -134,6 +134,36 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* Platform Trust Header Strip */
+.platformTrustBar {
+  background: #FAF5EE;
+  border-bottom: 1px solid #E8D8C0;
+  padding: 0.55rem 1.5rem;
+  font-size: 0.8rem;
+  color: #6B1D3D;
+}
+
+.platformTrustInner {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  font-weight: 500;
+}
+
+.platformTrustInner strong {
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.trustDivider {
+  color: #C5A880;
+}
+
 /* Nav Sub-Bar (Fixed & Spacious) */
 .subNavBar {
   background: #ffffff;
@@ -147,11 +177,19 @@
 .subNavBarInner {
   max-width: 1360px;
   margin: 0 auto;
-  padding: 0.75rem 2rem;
+  padding: 0.85rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
+}
+
+.pillsScrollWrapper {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .categoryPills {
@@ -163,7 +201,7 @@
   -webkit-overflow-scrolling: touch;
   flex: 1;
   min-width: 0;
-  padding: 0.25rem 0;
+  padding: 4px 1.5rem 4px 0;
 }
 
 .categoryPills::-webkit-scrollbar {
@@ -173,64 +211,139 @@
 .categoryPill {
   display: inline-flex;
   align-items: center;
-  padding: 0.45rem 1.15rem;
-  border-radius: 999px;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
   font-size: 0.8125rem;
-  font-weight: 500;
-  background: #f4f4f5;
-  color: #3f3f46;
-  border: 1px solid #e4e4e7;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: #F8FAFC;
+  color: #475569;
+  border: 1.5px solid var(--border-light);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .categoryPill:hover {
-  background: #e4e4e7;
-  color: #18181b;
+  color: #6B1D3D;
+  border-color: #E8C5D2;
+  background: #FBF0F4;
+  transform: translateY(-1px);
 }
 
 .categoryPillActive {
-  background: #111213;
-  color: #ffffff;
-  border-color: #111213;
-  font-weight: 600;
+  background: #6B1D3D !important;
+  color: #ffffff !important;
+  border-color: #6B1D3D !important;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(107, 29, 61, 0.2);
+  transform: translateY(-1px);
 }
 
-.categoryPillActive:hover {
-  background: #27272a;
+.pillCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.06);
+  color: #64748B;
+}
+
+.categoryPillActive .pillCount {
+  background: rgba(255, 255, 255, 0.22);
   color: #ffffff;
 }
 
 .sortGroup {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
   flex-shrink: 0;
+  padding-left: 1.5rem;
+  border-left: 1px solid var(--border-light);
 }
 
 .sortLabel {
   font-size: 0.8125rem;
-  color: #71717a;
-  font-weight: 500;
+  color: #64748B;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   white-space: nowrap;
 }
 
 .sortSelect {
-  padding: 0.45rem 1rem;
-  border: 1px solid #d4d4d8;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-pill);
   font-size: 0.8125rem;
+  font-weight: 600;
   background: #ffffff;
-  color: #18181b;
+  color: #0F172A;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.15s;
+  transition: all 0.2s ease;
 }
 
+.sortSelect:hover,
 .sortSelect:focus {
-  border-color: #111213;
+  border-color: #6B1D3D;
+}
+
+/* Bottom Platform Discovery Banner */
+.bottomPlatformCard {
+  margin: 4rem auto 2rem;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, #FAF8F5 0%, #F5EFEB 100%);
+  border: 1px solid #E8D8C0;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bottomPlatformCard h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.bottomPlatformCard p {
+  font-size: 0.92rem;
+  color: #64748B;
+  max-width: 540px;
+  margin: 0;
+}
+
+.exploreMarketplaceBtn {
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background-color: #6B1D3D;
+  color: #FFFFFF;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.22s ease;
+}
+
+.exploreMarketplaceBtn:hover {
+  background-color: #000000;
+  transform: translateY(-2px);
 }
 
 /* Main Catalog Area */

@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import ProductCard, { Product } from '../../components/storefront/ProductCard';
+import { getMarketplaceProductsAction } from '../../lib/supabase/actions';
 import styles from './shop.module.css';
 
 const ALL_CATALOG_PRODUCTS: Product[] = [
@@ -117,8 +118,23 @@ function ShopCatalog() {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedBrand, setSelectedBrand] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(ALL_CATALOG_PRODUCTS);
 
-  const filteredProducts = ALL_CATALOG_PRODUCTS.filter((product) => {
+  useEffect(() => {
+    getMarketplaceProductsAction({
+      category: selectedCategory !== 'all' ? selectedCategory : undefined,
+      query: initialQuery,
+      limit: 24,
+    })
+      .then((res) => {
+        if (res.ok && res.data && res.data.length > 0) {
+          setCatalogProducts(res.data as Product[]);
+        }
+      })
+      .catch((err) => console.warn('Failed to load dynamic marketplace products for shop:', err));
+  }, [selectedCategory, initialQuery]);
+
+  const filteredProducts = catalogProducts.filter((product) => {
     if (selectedCategory !== 'all' && product.category !== selectedCategory) {
       return false;
     }

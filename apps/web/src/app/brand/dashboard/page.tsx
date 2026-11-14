@@ -64,7 +64,7 @@ export default function BrandDashboardPage() {
     );
   }
 
-  const brandSlug = brand?.slug || 'adans-libas';
+  const brandSlug = brand?.slug || user?.brand?.slug || '';
   const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
   const unfulfilledOrders = orders.filter(
     (o) => o.fulfillmentStatus === 'PENDING' || o.fulfillmentStatus === 'PROCESSING'

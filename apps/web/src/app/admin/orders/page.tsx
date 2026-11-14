@@ -196,14 +196,21 @@ export default function AdminOrdersPage() {
               className={styles.btnTestOrder}
               title="Place a simulated order to verify real-time arrival in Master Admin and Store Owner portal"
             >
-              <span>{isSimulating ? 'Simulating...' : '⚡ Place Test Order'}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#008060' }}>
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+              <span>{isSimulating ? 'Simulating...' : 'Place Test Order'}</span>
             </button>
             <Link
               href="/admin/payments"
               className={styles.tabBtnActive}
-              style={{ borderRadius: '6px', padding: '0.65rem 1.25rem', textDecoration: 'none' }}
+              style={{ borderRadius: '6px', padding: '0.65rem 1.25rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             >
-              💳 Payment Settings →
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                <line x1="1" y1="10" x2="23" y2="10" />
+              </svg>
+              <span>Payment Settings →</span>
             </Link>
           </div>
         </div>
@@ -308,8 +315,12 @@ export default function AdminOrdersPage() {
                           </svg>
                           <span>Store: {ord.brandName}</span>
                         </Link>
-                        <div className={styles.storeOwnerText}>
-                          👤 Owner: <strong>{ord.storeOwnerName}</strong>
+                        <div className={styles.storeOwnerText} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
+                          <span>Owner: <strong>{ord.storeOwnerName}</strong></span>
                         </div>
                         <div className={styles.ownerEmailMuted}>{ord.storeOwnerEmail}</div>
                       </div>
@@ -318,12 +329,19 @@ export default function AdminOrdersPage() {
                     {/* Customer */}
                     <td className={styles.td}>
                       <p style={{ margin: 0, fontWeight: 500, color: '#111213' }}>{ord.customerName}</p>
-                      <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.75rem', color: '#6d7175' }}>
-                        📍 {ord.city}
+                      <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.75rem', color: '#6d7175', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                          <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <span>{ord.city}</span>
                       </p>
                       {ord.customerPhone && (
-                        <p style={{ margin: '0.1rem 0 0 0', fontSize: '0.7rem', color: '#6d7175' }}>
-                          📞 {ord.customerPhone}
+                        <p style={{ margin: '0.1rem 0 0 0', fontSize: '0.7rem', color: '#6d7175', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                          </svg>
+                          <span>{ord.customerPhone}</span>
                         </p>
                       )}
                     </td>

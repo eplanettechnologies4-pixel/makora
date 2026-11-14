@@ -1,6 +1,10 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getMarketplaceBrandsAction, type MarketplaceBrandCard } from '../../lib/supabase/actions';
+import { DUMMY_STORE_BRANDS } from '../../lib/dummyCatalog';
 import styles from './brands.module.css';
 
 interface BrandProfile {
@@ -13,7 +17,7 @@ interface BrandProfile {
   formulationCount: number;
 }
 
-const VERIFIED_BRANDS: BrandProfile[] = [
+const DEFAULT_VERIFIED_BRANDS: BrandProfile[] = [
   {
     name: "Adan's Libas",
     slug: 'adans-libas',
@@ -80,6 +84,27 @@ const VERIFIED_BRANDS: BrandProfile[] = [
 ];
 
 export default function BrandsDirectoryPage() {
+  const [brands, setBrands] = useState<BrandProfile[]>(DEFAULT_VERIFIED_BRANDS);
+
+  useEffect(() => {
+    getMarketplaceBrandsAction(8)
+      .then((res) => {
+        if (res.ok && res.data && res.data.length > 0) {
+          const mapped: BrandProfile[] = res.data.map((b) => ({
+            name: b.name,
+            slug: b.slug,
+            city: b.origin,
+            specialty: b.category,
+            bio: b.focus,
+            bannerImage: b.image,
+            formulationCount: b.productCount,
+          }));
+          setBrands(mapped);
+        }
+      })
+      .catch((err) => console.warn('Failed to load dynamic brands for directory:', err));
+  }, []);
+
   return (
     <div className={styles.page}>
       <div className="container">
@@ -100,7 +125,7 @@ export default function BrandsDirectoryPage() {
         </div>
 
         <div className={styles.grid}>
-          {VERIFIED_BRANDS.map((brand) => (
+          {brands.map((brand) => (
             <Link
               key={brand.slug}
               href={`/brands/${brand.slug}`}
@@ -124,27 +149,14 @@ export default function BrandsDirectoryPage() {
                 <p className={styles.bio}>{brand.bio}</p>
 
                 <div className={styles.footer}>
-                  <span>{brand.formulationCount} Formulations</span>
+                  <span>{brand.formulationCount > 0 ? `${brand.formulationCount} Creations` : 'Featured House'}</span>
                   <span style={{ color: 'var(--accent-gold-hover)' }}>View Catalog →</span>
                 </div>
               </div>
             </Link>
           ))}
         </div>
-
-        {/* Onboarding Banner for Aspiring Brands */}
-        <div className={styles.onboardingCta}>
-          <h3 className={styles.ctaTitle}>Are You an Independent Beauty Formulator?</h3>
-          <p className={styles.ctaText}>
-            Join Makaura’s exclusive multi-vendor luxury platform. Enjoy automated weekly COD settlements,
-            dedicated seller portals, nationwide logistics, and direct access to beauty connoisseurs.
-          </p>
-          <Link href="/brand/register" className="btn btn-primary" id="cta-brand-onboard">
-            Submit Your Brand Application
-          </Link>
-        </div>
       </div>
     </div>
   );
 }
-
