@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import styles from './AdminShell.module.css';
@@ -36,12 +37,12 @@ export default function AdminShell({ children, pendingCount }: AdminShellProps) 
       <div
         style={{
           minHeight: '100vh',
-          backgroundColor: '#0d1117',
-          color: '#e6edf3',
+          backgroundColor: '#f1f2f4',
+          color: '#111213',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'sans-serif',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         }}
       >
         <p>Loading Makaura Master Administration Console...</p>
@@ -58,11 +59,18 @@ export default function AdminShell({ children, pendingCount }: AdminShellProps) 
       title: 'Overview',
       href: '/admin/dashboard',
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="3" width="7" height="7" rx="1" />
-          <rect x="14" y="3" width="7" height="7" rx="1" />
-          <rect x="14" y="14" width="7" height="7" rx="1" />
-          <rect x="3" y="14" width="7" height="7" rx="1" />
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+      ),
+    },
+    {
+      title: 'Platform Orders',
+      href: '/admin/orders',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+          <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
         </svg>
       ),
     },
@@ -70,8 +78,8 @@ export default function AdminShell({ children, pendingCount }: AdminShellProps) 
       title: 'Brand Directory',
       href: '/admin/brands',
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 21h18M3 7v14M21 7v14M6 21V11a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10M9 9V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4" />
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm6 6H7v2h6v-2zm-6 4h6v2H7v-2z" clipRule="evenodd" />
         </svg>
       ),
     },
@@ -80,12 +88,9 @@ export default function AdminShell({ children, pendingCount }: AdminShellProps) 
       href: '/admin/brands/applications',
       badge: pendingCount && pendingCount > 0 ? pendingCount : undefined,
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
-          <polyline points="10 9 9 9 8 9" />
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+          <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
         </svg>
       ),
     },
@@ -93,20 +98,9 @@ export default function AdminShell({ children, pendingCount }: AdminShellProps) 
       title: 'Payment & Commissions',
       href: '/admin/payments',
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-          <line x1="1" y1="10" x2="23" y2="10" />
-        </svg>
-      ),
-    },
-    {
-      title: 'Platform Orders',
-      href: '/admin/orders',
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="9" cy="21" r="1" />
-          <circle cx="20" cy="21" r="1" />
-          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+          <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
         </svg>
       ),
     },
@@ -127,14 +121,19 @@ export default function AdminShell({ children, pendingCount }: AdminShellProps) 
     <div className={styles.wrapper}>
       {/* Sidebar Navigation */}
       <aside className={styles.sidebar}>
+        {/* Official Makaura Site Logo on Top Left */}
         <div className={styles.brandHeader}>
-          <div className={styles.brandInfo}>
-            <div className={styles.brandLogo}>M</div>
-            <div>
-              <p className={styles.brandTextTitle}>Makaura</p>
-              <p className={styles.brandTextSubtitle}>Master Control</p>
-            </div>
-          </div>
+          <Link href="/admin/dashboard" className={styles.brandLogoLink} title="Makaura Master Administration">
+            <Image
+              src="/images/logo-white.png"
+              alt="Makaura"
+              width={130}
+              height={42}
+              priority
+              className={styles.brandLogoImg}
+            />
+          </Link>
+          <span className={styles.adminBadge}>Admin</span>
         </div>
 
         {/* Navigation Section */}
@@ -176,10 +175,8 @@ export default function AdminShell({ children, pendingCount }: AdminShellProps) 
               className={styles.logoutBtn}
               title="Sign Out of Master Admin"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </button>
           </div>
@@ -191,7 +188,7 @@ export default function AdminShell({ children, pendingCount }: AdminShellProps) 
         {/* Top App Bar */}
         <header className={styles.topBar}>
           <div className={styles.breadcrumbs}>
-            <span>Makaura Admin</span>
+            <span className={styles.breadcrumbPrefix}>Makaura</span>
             <span className={styles.breadcrumbSeparator}>/</span>
             <span className={styles.breadcrumbCurrent}>{getBreadcrumbTitle()}</span>
           </div>
@@ -203,11 +200,9 @@ export default function AdminShell({ children, pendingCount }: AdminShellProps) 
               rel="noopener noreferrer"
               className={styles.storefrontLink}
             >
-              <span>Visit Makaura Store</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
+              <span>View Online Store</span>
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </Link>
           </div>

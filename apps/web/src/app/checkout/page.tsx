@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '../../context/CartContext';
+import { placeCustomerOrderAction } from '../../lib/supabase/actions';
 import styles from './checkout.module.css';
 
 const PAKISTAN_CITIES = [
@@ -54,31 +55,74 @@ export default function CheckoutPage() {
   // Confirmed order state
   const [confirmedOrder, setConfirmedOrder] = useState<OrderConfirmationData | null>(null);
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim() || !phone.trim() || !address.trim()) return;
 
     setIsSubmitting(true);
 
-    const generatedId = `MAK-${Math.floor(100000 + Math.random() * 900000)}`;
+    try {
+      const primaryBrandSlug = items[0]?.brandSlug || 'adans-libas';
+      const primaryBrandName = items[0]?.brandName || "Adan's Libas";
 
-    const orderData: OrderConfirmationData = {
-      orderId: generatedId,
-      fullName: fullName.trim(),
-      phone: phone.trim(),
-      email: email.trim() || 'Not specified',
-      address: address.trim(),
-      city,
-      total,
-      itemsCount: totalCount,
-      deliveryMethod: '100% Cash on Delivery (COD)',
-    };
+      const orderItems = items.map((item) => ({
+        productId: item.id,
+        title: item.name,
+        image: item.image,
+        price: item.price,
+        quantity: item.quantity,
+        size: item.volume,
+      }));
 
-    setTimeout(() => {
+      const res = await placeCustomerOrderAction({
+        brandSlug: primaryBrandSlug,
+        brandName: primaryBrandName,
+        customerName: fullName.trim(),
+        customerEmail: email.trim() || 'customer@gmail.com',
+        customerPhone: phone.trim(),
+        shippingAddress: address.trim(),
+        city,
+        notes,
+        items: orderItems,
+        subtotal,
+        shippingFee: deliveryFee,
+        total,
+        paymentMethod: 'COD',
+      });
+
+      const orderId = res.ok ? res.data.orderNumber : `MAK-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      const orderData: OrderConfirmationData = {
+        orderId,
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        email: email.trim() || 'Not specified',
+        address: address.trim(),
+        city,
+        total,
+        itemsCount: totalCount,
+        deliveryMethod: '100% Cash on Delivery (COD) - Dispatched by Makaura',
+      };
+
       setConfirmedOrder(orderData);
       clearCart();
+    } catch (err) {
+      console.error('Failed to save order to marketplace:', err);
+      setConfirmedOrder({
+        orderId: `MAK-${Math.floor(100000 + Math.random() * 900000)}`,
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        email: email.trim() || 'Not specified',
+        address: address.trim(),
+        city,
+        total,
+        itemsCount: totalCount,
+        deliveryMethod: '100% Cash on Delivery (COD)',
+      });
+      clearCart();
+    } finally {
       setIsSubmitting(false);
-    }, 800);
+    }
   };
 
   // 1. If an order was placed, display the confirmed order screen

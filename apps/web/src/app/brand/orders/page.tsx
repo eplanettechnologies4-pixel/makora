@@ -154,20 +154,19 @@ export default function BrandOrdersPage() {
               <div className={styles.card}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                   <h2 className={styles.cardTitle} style={{ margin: 0 }}>
-                    Items to Fulfill ({selectedOrder.items?.length || 0})
+                    Items Ordered ({selectedOrder.items?.length || 0})
                   </h2>
-                  {selectedOrder.fulfillmentStatus === 'PENDING' || selectedOrder.fulfillmentStatus === 'PROCESSING' ? (
-                    <button
-                      onClick={() => handleOpenFulfill(selectedOrder)}
-                      className={styles.btnPrimary}
-                    >
-                      Fulfill items
-                    </button>
-                  ) : (
-                    <span style={{ fontSize: '0.8125rem', color: '#108043', fontWeight: 600 }}>
-                      ✓ Dispatched via {selectedOrder.courierName} ({selectedOrder.trackingNumber})
-                    </span>
-                  )}
+                  <div style={{ textAlign: 'right' }}>
+                    {selectedOrder.fulfillmentStatus === 'DELIVERED' || selectedOrder.fulfillmentStatus === 'DISPATCHED' ? (
+                      <span style={{ fontSize: '0.8125rem', color: '#108043', fontWeight: 600, backgroundColor: '#f0fdf4', padding: '0.3rem 0.75rem', borderRadius: 4, border: '1px solid #bbf7d0' }}>
+                        ✓ Dispatched by Makaura ({selectedOrder.courierName || 'Courier'} • {selectedOrder.trackingNumber || 'AWB'})
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: '0.8125rem', color: '#b45309', fontWeight: 600, backgroundColor: '#fffbeb', padding: '0.3rem 0.75rem', borderRadius: 4, border: '1px solid #fef3c7' }}>
+                        🚚 In Queue for Makaura Central Dispatch
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

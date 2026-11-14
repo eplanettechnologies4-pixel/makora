@@ -231,10 +231,10 @@ export default function AdminBrandsManagementPage() {
 
                     {/* Owner */}
                     <td className={styles.td}>
-                      <p style={{ margin: 0, fontWeight: 500, color: '#ffffff', fontSize: '0.84rem' }}>
+                      <p style={{ margin: 0, fontWeight: 500, color: '#111213', fontSize: '0.84rem' }}>
                         {brand.owner?.firstName} {brand.owner?.lastName || ''}
                       </p>
-                      <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.74rem', color: '#8b949e' }}>
+                      <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.74rem', color: '#6d7175' }}>
                         {brand.owner?.email || 'Registered Vendor'}
                       </p>
                     </td>
@@ -246,7 +246,7 @@ export default function AdminBrandsManagementPage() {
 
                     {/* Products */}
                     <td className={styles.td}>
-                      <span style={{ fontWeight: 600, color: '#e6edf3' }}>
+                      <span style={{ fontWeight: 600, color: '#111213' }}>
                         {brand.productCount} items
                       </span>
                     </td>
@@ -270,17 +270,17 @@ export default function AdminBrandsManagementPage() {
                     <td className={styles.td}>
                       {brand.status === 'APPROVED' ? (
                         <span className={styles.badgeApproved}>
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3fb950' }} />
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#108043' }} />
                           Active (Live)
                         </span>
                       ) : brand.status === 'SUSPENDED' ? (
                         <span className={styles.badgeSuspended}>
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f85149' }} />
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#d72c0d' }} />
                           Suspended
                         </span>
                       ) : (
                         <span className={styles.badgePending}>
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#d29922' }} />
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#b95000' }} />
                           {brand.status}
                         </span>
                       )}

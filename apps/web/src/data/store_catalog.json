@@ -235,6 +235,95 @@
   ],
   "orders": [
     {
+      "id": "ord-noor-401",
+      "orderNumber": "MAK-2026-8877",
+      "brandSlug": "noor-artisanal",
+      "brandName": "Noor Artisanal Cosmetics",
+      "storeOwnerName": "Noor Fatima",
+      "storeOwnerEmail": "store@noorcosmetics.com",
+      "customerName": "Anum Jahangir",
+      "customerEmail": "anum.j@hotmail.com",
+      "customerPhone": "+92 334 1123987",
+      "shippingAddress": "House 19-C, Sector G-11/3",
+      "city": "Islamabad",
+      "items": [
+        {
+          "productId": "prod-noor-01",
+          "title": "Halal Silk Peptide Radiant Tint and Lip Lacquer Bundle",
+          "image": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80",
+          "price": 9200,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 9200,
+      "shippingFee": 250,
+      "total": 9450,
+      "paymentMethod": "COD",
+      "codStatus": "PENDING",
+      "fulfillmentStatus": "PENDING",
+      "createdAt": "2026-11-14T05:02:13.624Z"
+    },
+    {
+      "id": "ord-aura-301",
+      "orderNumber": "MAK-2026-8845",
+      "brandSlug": "aura-scents",
+      "brandName": "Aura Scents House",
+      "storeOwnerName": "Bilal Ahmed",
+      "storeOwnerEmail": "store@aurascents.pk",
+      "customerName": "Muhammad Hamza",
+      "customerEmail": "hamza.m@yahoo.com",
+      "customerPhone": "+92 301 5567821",
+      "shippingAddress": "Flat 12, Ocean View Towers, Clifton Block 4",
+      "city": "Karachi",
+      "items": [
+        {
+          "productId": "prod-aura-01",
+          "title": "Cambodian Oud and Damask Rose Extrait de Parfum 50ml",
+          "image": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80",
+          "price": 24500,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 24500,
+      "shippingFee": 0,
+      "total": 24500,
+      "paymentMethod": "ONLINE",
+      "codStatus": "COLLECTED",
+      "fulfillmentStatus": "PROCESSING",
+      "courierName": "Trax Logistics",
+      "trackingNumber": "TRX-94810294",
+      "createdAt": "2026-11-13T23:02:13.624Z"
+    },
+    {
+      "id": "ord-mdr-201",
+      "orderNumber": "MAK-2026-8812",
+      "brandSlug": "maison-de-rose",
+      "brandName": "Maison de Rose",
+      "storeOwnerName": "Zainab Qureshi",
+      "storeOwnerEmail": "store@maisonderose.com",
+      "customerName": "Khadija Rehman",
+      "customerEmail": "khadija.r@gmail.com",
+      "customerPhone": "+92 322 9182341",
+      "shippingAddress": "House 88, Street 14, Cavalry Ground",
+      "city": "Lahore",
+      "items": [
+        {
+          "productId": "prod-mdr-01",
+          "title": "High-Altitude Saffron and Rosehip Restorative Night Elixir 30ml",
+          "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=800&q=80",
+          "price": 8400,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 8400,
+      "shippingFee": 250,
+      "total": 8650,
+      "paymentMethod": "COD",
+      "codStatus": "PENDING",
+      "fulfillmentStatus": "PENDING",
+      "createdAt": "2026-11-14T04:02:13.623Z"
+    },
+    {
       "id": "ord-adan-101",
       "orderNumber": "ORD-2026-9481",
       "brandSlug": "adans-libas",
@@ -261,7 +350,10 @@
       "fulfillmentStatus": "DELIVERED",
       "courierName": "Trax Logistics",
       "trackingNumber": "TRX-78291048",
-      "createdAt": "2026-11-09T14:22:00Z"
+      "createdAt": "2026-11-09T14:22:00Z",
+      "brandName": "Adan's Libas",
+      "storeOwnerName": "Adan Khan",
+      "storeOwnerEmail": "store@adanslibas.com"
     },
     {
       "id": "ord-adan-102",
@@ -290,7 +382,10 @@
       "fulfillmentStatus": "DISPATCHED",
       "courierName": "Leopards Courier",
       "trackingNumber": "LEO-99482103",
-      "createdAt": "2026-11-11T10:15:00Z"
+      "createdAt": "2026-11-11T10:15:00Z",
+      "brandName": "Adan's Libas",
+      "storeOwnerName": "Adan Khan",
+      "storeOwnerEmail": "store@adanslibas.com"
     },
     {
       "id": "ord-adan-103",
@@ -319,7 +414,10 @@
       "fulfillmentStatus": "PROCESSING",
       "courierName": "TCS Express",
       "trackingNumber": "TCS-10293847",
-      "createdAt": "2026-11-12T16:45:00Z"
+      "createdAt": "2026-11-12T16:45:00Z",
+      "brandName": "Adan's Libas",
+      "storeOwnerName": "Adan Khan",
+      "storeOwnerEmail": "store@adanslibas.com"
     },
     {
       "id": "ord-adan-104",
@@ -346,7 +444,10 @@
       "paymentMethod": "COD",
       "codStatus": "PENDING",
       "fulfillmentStatus": "PENDING",
-      "createdAt": "2026-11-13T09:20:00Z"
+      "createdAt": "2026-11-13T09:20:00Z",
+      "brandName": "Adan's Libas",
+      "storeOwnerName": "Adan Khan",
+      "storeOwnerEmail": "store@adanslibas.com"
     }
   ],
   "customers": [

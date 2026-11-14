@@ -1590,6 +1590,7 @@ import {
   saveStoreCategory,
   deleteStoreCategory,
   getStoreOrders,
+  createStoreOrder,
   updateStoreOrderStatus,
   getStoreCustomers,
   StoreProduct,
@@ -1843,6 +1844,7 @@ export interface AdminStatsData {
   pendingApplications: number;
   totalProducts: number;
   totalOrders: number;
+  pendingDispatchCount: number;
   grossMarketplaceVolume: number;
   paymentMethodsActive: number;
 }
@@ -1882,6 +1884,9 @@ export async function getAdminMarketplaceStatsAction(): Promise<ActionResult<Adm
 
   const totalProducts = catalogProducts.length > 0 ? catalogProducts.length * 6 : 84;
   const totalOrders = catalogOrders.length;
+  const pendingDispatchCount = catalogOrders.filter(
+    (o) => o.fulfillmentStatus === 'PENDING' || o.fulfillmentStatus === 'PROCESSING'
+  ).length;
   const grossMarketplaceVolume = catalogOrders.reduce((sum, ord) => sum + (ord.total || 0), 0);
 
   const paymentSettings = getFilePaymentSettings();
@@ -1899,6 +1904,7 @@ export async function getAdminMarketplaceStatsAction(): Promise<ActionResult<Adm
       pendingApplications,
       totalProducts,
       totalOrders,
+      pendingDispatchCount,
       grossMarketplaceVolume,
       paymentMethodsActive,
     },
@@ -2242,15 +2248,31 @@ export interface AdminPlatformOrder {
   orderNumber: string;
   brandName: string;
   brandSlug: string;
+  storeOwnerName: string;
+  storeOwnerEmail: string;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
+  shippingAddress?: string;
   city: string;
   total: number;
+  subtotal?: number;
+  shippingFee?: number;
   paymentMethod: string;
   paymentStatus: string;
   fulfillmentStatus: string;
+  courierName?: string;
+  trackingNumber?: string;
   createdAt: string;
   itemCount: number;
+  items: {
+    productId: string;
+    title: string;
+    image: string;
+    price: number;
+    quantity: number;
+    size?: string;
+  }[];
 }
 
 export async function listAdminAllOrdersAction(): Promise<ActionResult<AdminPlatformOrder[]>> {
@@ -2259,56 +2281,103 @@ export async function listAdminAllOrdersAction(): Promise<ActionResult<AdminPlat
 
   const catalogOrders = getStoreOrders();
 
-  // Map and synthesize realistic multi-brand platform orders ledger
-  const orders: AdminPlatformOrder[] = [
-    ...catalogOrders.map((o) => ({
-      id: o.id,
-      orderNumber: o.orderNumber || o.id,
-      brandName: "Adan's Libas",
-      brandSlug: o.brandSlug || 'adans-libas',
-      customerName: o.customerName,
-      customerEmail: o.customerEmail,
-      city: o.city,
-      total: o.total,
-      paymentMethod: o.paymentMethod === 'COD' ? 'Cash on Delivery (COD)' : 'Direct Bank Transfer (IBFT)',
-      paymentStatus: o.codStatus === 'COLLECTED' ? 'PAID' : 'PENDING',
-      fulfillmentStatus: o.fulfillmentStatus,
-      createdAt: o.createdAt,
-      itemCount: o.items.length,
-    })),
-    {
-      id: 'ORD-9104',
-      orderNumber: 'ORD-9104',
-      brandName: 'Maison de Rose',
-      brandSlug: 'maison-de-rose',
-      customerName: 'Fatima Zahra',
-      customerEmail: 'fatima.zahra@gmail.com',
-      city: 'Islamabad',
-      total: 18400,
-      paymentMethod: 'PayFast / Credit Card',
-      paymentStatus: 'PAID',
-      fulfillmentStatus: 'FULFILLED',
-      createdAt: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
-      itemCount: 2,
-    },
-    {
-      id: 'ORD-9105',
-      orderNumber: 'ORD-9105',
-      brandName: 'Aura Scents House',
-      brandSlug: 'aura-scents',
-      customerName: 'Usman Tariq',
-      customerEmail: 'usman.tariq@yahoo.com',
-      city: 'Karachi',
-      total: 32500,
-      paymentMethod: 'Cash on Delivery (COD)',
-      paymentStatus: 'PENDING',
-      fulfillmentStatus: 'UNFULFILLED',
-      createdAt: new Date(Date.now() - 14 * 3600 * 1000).toISOString(),
-      itemCount: 3,
-    },
-  ];
+  const orders: AdminPlatformOrder[] = catalogOrders.map((o) => ({
+    id: o.id,
+    orderNumber: o.orderNumber || o.id,
+    brandName: o.brandName || "Adan's Libas",
+    brandSlug: o.brandSlug || 'adans-libas',
+    storeOwnerName: o.storeOwnerName || 'Adan Khan',
+    storeOwnerEmail: o.storeOwnerEmail || 'store@adanslibas.com',
+    customerName: o.customerName,
+    customerEmail: o.customerEmail,
+    customerPhone: o.customerPhone,
+    shippingAddress: o.shippingAddress,
+    city: o.city,
+    total: o.total,
+    subtotal: o.subtotal,
+    shippingFee: o.shippingFee,
+    paymentMethod:
+      o.paymentMethod === 'COD'
+        ? 'Cash on Delivery (COD)'
+        : o.paymentMethod === 'BANK_TRANSFER'
+        ? 'Direct Bank Transfer (IBFT)'
+        : 'Online Gateway / PayFast',
+    paymentStatus: o.codStatus === 'COLLECTED' ? 'PAID' : 'PENDING',
+    fulfillmentStatus: o.fulfillmentStatus,
+    courierName: o.courierName,
+    trackingNumber: o.trackingNumber,
+    createdAt: o.createdAt,
+    itemCount: o.items ? o.items.length : 0,
+    items: o.items || [],
+  }));
 
   return { ok: true, data: orders };
+}
+
+export async function updateAdminOrderStatusAction(
+  orderId: string,
+  updates: {
+    fulfillmentStatus?: StoreOrder['fulfillmentStatus'];
+    codStatus?: StoreOrder['codStatus'];
+    courierName?: string;
+    trackingNumber?: string;
+  }
+): Promise<ActionResult<StoreOrder>> {
+  const auth = await requireAdminUser();
+  if (!auth.ok) return auth;
+
+  const updated = updateStoreOrderStatus(orderId, updates);
+  if (!updated) {
+    return { ok: false, error: 'Order not found', status: 404 };
+  }
+
+  await writeAuditLog({
+    userId: auth.data.authUserId,
+    action: `ADMIN_DISPATCH_ORDER_${updates.fulfillmentStatus || 'UPDATED'}`,
+    entity: 'StoreOrder',
+    entityId: orderId,
+    metadata: {
+      orderNumber: updated.orderNumber,
+      brandSlug: updated.brandSlug,
+      fulfillmentStatus: updated.fulfillmentStatus,
+      courierName: updated.courierName,
+      trackingNumber: updated.trackingNumber,
+    },
+  });
+
+  return { ok: true, data: updated };
+}
+
+export async function placeCustomerOrderAction(input: {
+  brandSlug?: string;
+  brandName?: string;
+  storeOwnerName?: string;
+  storeOwnerEmail?: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  shippingAddress: string;
+  city: string;
+  notes?: string;
+  items: {
+    productId: string;
+    title: string;
+    image: string;
+    price: number;
+    quantity: number;
+    size?: string;
+  }[];
+  subtotal: number;
+  shippingFee: number;
+  total: number;
+  paymentMethod?: 'COD' | 'ONLINE' | 'BANK_TRANSFER';
+}): Promise<ActionResult<StoreOrder>> {
+  if (!input.customerName || !input.customerPhone || !input.shippingAddress) {
+    return { ok: false, error: 'Customer name, phone number, and delivery address are required.', status: 400 };
+  }
+
+  const order = createStoreOrder(input);
+  return { ok: true, data: order };
 }
 
 

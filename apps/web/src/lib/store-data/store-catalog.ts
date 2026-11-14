@@ -38,6 +38,9 @@ export interface StoreOrder {
   id: string;
   orderNumber: string;
   brandSlug: string;
+  brandName?: string;
+  storeOwnerName?: string;
+  storeOwnerEmail?: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -54,11 +57,12 @@ export interface StoreOrder {
   subtotal: number;
   shippingFee: number;
   total: number;
-  paymentMethod: 'COD' | 'ONLINE';
+  paymentMethod: 'COD' | 'ONLINE' | 'BANK_TRANSFER';
   codStatus: 'PENDING' | 'COLLECTED' | 'REMITTED';
   fulfillmentStatus: 'PENDING' | 'PROCESSING' | 'DISPATCHED' | 'DELIVERED' | 'CANCELLED';
   courierName?: string;
   trackingNumber?: string;
+  notes?: string;
   createdAt: string;
 }
 
@@ -640,6 +644,100 @@ export function updateStoreOrderStatus(
 
   writeStoreData(data);
   return order;
+}
+
+const BRAND_OWNER_DIRECTORY: Record<string, { brandName: string; ownerName: string; ownerEmail: string }> = {
+  'adans-libas': {
+    brandName: "Adan's Libas",
+    ownerName: 'Adan Khan',
+    ownerEmail: 'store@adanslibas.com',
+  },
+  'maison-de-rose': {
+    brandName: 'Maison de Rose',
+    ownerName: 'Zainab Qureshi',
+    ownerEmail: 'store@maisonderose.com',
+  },
+  'aura-scents': {
+    brandName: 'Aura Scents House',
+    ownerName: 'Bilal Ahmed',
+    ownerEmail: 'store@aurascents.pk',
+  },
+  'noor-artisanal': {
+    brandName: 'Noor Artisanal Cosmetics',
+    ownerName: 'Noor Fatima',
+    ownerEmail: 'store@noorcosmetics.com',
+  },
+  'botanica-raw-labs': {
+    brandName: 'Botanica Raw Labs',
+    ownerName: 'Hamza Baig',
+    ownerEmail: 'store@botanicaraw.pk',
+  },
+};
+
+export function createStoreOrder(input: Partial<StoreOrder>): StoreOrder {
+  const data = readStoreData();
+  const slug = input.brandSlug || 'adans-libas';
+  const brandMeta = BRAND_OWNER_DIRECTORY[slug] || {
+    brandName: input.brandName || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+    ownerName: input.storeOwnerName || 'Store Manager',
+    ownerEmail: input.storeOwnerEmail || `store@${slug}.com`,
+  };
+
+  const id = input.id || `ord-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
+  const orderNumber = input.orderNumber || `MAK-${Math.floor(100000 + Math.random() * 900000)}`;
+
+  const newOrder: StoreOrder = {
+    id,
+    orderNumber,
+    brandSlug: slug,
+    brandName: input.brandName || brandMeta.brandName,
+    storeOwnerName: input.storeOwnerName || brandMeta.ownerName,
+    storeOwnerEmail: input.storeOwnerEmail || brandMeta.ownerEmail,
+    customerName: input.customerName || 'Customer',
+    customerEmail: input.customerEmail || 'customer@gmail.com',
+    customerPhone: input.customerPhone || '+92 300 0000000',
+    shippingAddress: input.shippingAddress || 'Delivery Address',
+    city: input.city || 'Lahore',
+    items: input.items || [],
+    subtotal: input.subtotal || 0,
+    shippingFee: input.shippingFee !== undefined ? input.shippingFee : 250,
+    total: input.total || 0,
+    paymentMethod: (input.paymentMethod as any) || 'COD',
+    codStatus: input.codStatus || 'PENDING',
+    fulfillmentStatus: input.fulfillmentStatus || 'PENDING',
+    courierName: input.courierName,
+    trackingNumber: input.trackingNumber,
+    notes: input.notes,
+    createdAt: input.createdAt || new Date().toISOString(),
+  };
+
+  data.orders.unshift(newOrder);
+
+  // Sync or add customer
+  const existingCust = data.customers.find(
+    (c) => c.email.toLowerCase() === newOrder.customerEmail.toLowerCase()
+  );
+  if (existingCust) {
+    existingCust.totalOrders += 1;
+    existingCust.totalSpend += newOrder.total;
+    existingCust.lastOrderDate = newOrder.createdAt;
+  } else {
+    data.customers.push({
+      id: `cust-${Date.now().toString(36)}`,
+      brandSlug: slug,
+      name: newOrder.customerName,
+      email: newOrder.customerEmail,
+      phone: newOrder.customerPhone,
+      city: newOrder.city,
+      totalOrders: 1,
+      totalSpend: newOrder.total,
+      lastOrderDate: newOrder.createdAt,
+      tier: 'New',
+    });
+  }
+
+  writeStoreData(data);
+  return newOrder;
 }
 
 export function getStoreCustomers(brandSlug?: string): StoreCustomer[] {
