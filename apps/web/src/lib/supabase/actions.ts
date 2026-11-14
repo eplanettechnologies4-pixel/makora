@@ -2859,10 +2859,7 @@ export async function getMarketplaceBrandsAction(targetCount: number = 4): Promi
           b.story ||
           'Handcrafted luxury, bespoke formulations, and authentic Pakistani craftsmanship.',
         productCount: countMap[b.id] || 0,
-        image:
-          b.bannerUrl ||
-          b.logoUrl ||
-          'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=700&q=80',
+        image: b.bannerUrl || b.logoUrl || '',
         logoUrl: b.logoUrl,
         isReal: true,
       }));

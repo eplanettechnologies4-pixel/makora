@@ -177,9 +177,16 @@
 .brandFocus {
   font-size: 0.84rem;
   color: #475569;
-  line-height: 1.5;
+  line-height: 1.55;
   margin-bottom: 22px;
-  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 6.2em;
+  max-height: 6.2em;
 }
 
 .actionRow {

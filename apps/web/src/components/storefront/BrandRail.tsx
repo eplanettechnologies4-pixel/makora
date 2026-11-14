@@ -7,6 +7,21 @@ import { getMarketplaceBrandsAction, type MarketplaceBrandCard } from '../../lib
 import { DUMMY_STORE_BRANDS } from '../../lib/dummyCatalog';
 import styles from './BrandRail.module.css';
 
+const BRAND_COVER_FALLBACKS = [
+  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=700&q=80',
+  'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=700&q=80',
+  'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=700&q=80',
+  'https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=700&q=80',
+  'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=700&q=80',
+  'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=700&q=80',
+  'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=700&q=80',
+];
+
+function getBrandFallbackCover(slug: string): string {
+  const code = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return BRAND_COVER_FALLBACKS[code % BRAND_COVER_FALLBACKS.length];
+}
+
 export default function BrandRail() {
   const [brands, setBrands] = useState<MarketplaceBrandCard[]>(DUMMY_STORE_BRANDS.slice(0, 4));
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
@@ -45,8 +60,8 @@ export default function BrandRail() {
 
         <div className={styles.brandsGrid}>
           {brands.map((b) => {
-            const imgSrc = failedImages[b.slug]
-              ? 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=700&q=80'
+            const imgSrc = failedImages[b.slug] || !b.image
+              ? getBrandFallbackCover(b.slug)
               : b.image;
 
             return (

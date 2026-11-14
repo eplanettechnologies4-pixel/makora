@@ -10,7 +10,7 @@ import styles from '../products/shopify-product.module.css';
 
 const PRESET_BANNERS = [
   {
-    name: 'Red Embroidered (LAAM Reference)',
+    name: 'Red Embroidered Pret',
     url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1920&q=80',
   },
   {
@@ -20,6 +20,18 @@ const PRESET_BANNERS = [
   {
     name: 'Summer Silk & Organza',
     url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1920&q=80',
+  },
+  {
+    name: 'Artisanal Beauty & Skincare',
+    url: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1920&q=80',
+  },
+  {
+    name: 'Botanical Hair & Scalp',
+    url: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=1920&q=80',
+  },
+  {
+    name: 'Niche Perfumes & Attars',
+    url: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1920&q=80',
   },
 ];
 
@@ -189,17 +201,51 @@ export default function BrandBannerPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Banner Image URL</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                <label className={styles.label} style={{ margin: 0 }}>Banner / Cover Image</label>
+                <label style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: '#008060',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  Upload from Device
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === 'string') {
+                          setBannerUrl(reader.result);
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+              </div>
               <input
-                type="url"
+                type="text"
                 required
                 className={styles.input}
-                placeholder="https://... (Recommended: 1920 x 600px)"
+                placeholder="https://... or upload from your device"
                 value={bannerUrl}
                 onChange={(e) => setBannerUrl(e.target.value)}
               />
               <p className={styles.helpText}>
-                High resolution landscape image showcasing your brand aesthetic.
+                This image appears as your storefront hero banner and on the homepage Shop by Brand card. Recommended: 1920 x 600px or landscape.
               </p>
             </div>
 
@@ -247,11 +293,45 @@ export default function BrandBannerPage() {
                 )}
               </div>
               <div style={{ flex: 1 }}>
-                <label className={styles.label}>Logo URL</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                  <label className={styles.label} style={{ margin: 0 }}>Logo / Avatar</label>
+                  <label style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: '#008060',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    Upload from Device
+                    <input
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          if (typeof reader.result === 'string') {
+                            setLogoUrl(reader.result);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                  </label>
+                </div>
                 <input
-                  type="url"
+                  type="text"
                   className={styles.input}
-                  placeholder="https://... (Square 400x400px)"
+                  placeholder="https://... or upload from device"
                   value={logoUrl}
                   onChange={(e) => setLogoUrl(e.target.value)}
                 />

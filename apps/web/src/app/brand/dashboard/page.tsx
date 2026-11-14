@@ -264,9 +264,28 @@ export default function BrandDashboardPage() {
               href={`/brands/${brandSlug}`}
               target="_blank"
               className={styles.btnSecondary}
-              style={{ width: '100%', textAlign: 'center', display: 'block' }}
+              style={{ width: '100%', textAlign: 'center', display: 'block', marginBottom: '0.5rem' }}
             >
               View Online Store ↗
+            </Link>
+            <Link
+              href="/brand/banner"
+              style={{
+                width: '100%',
+                textAlign: 'center',
+                display: 'block',
+                padding: '0.55rem 0.75rem',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                color: '#2c6ecb',
+                background: '#f4f6f8',
+                borderRadius: '6px',
+                textDecoration: 'none',
+                border: '1px solid #c9cccf',
+                transition: 'background 0.2s ease',
+              }}
+            >
+              📷 Change Cover Photo / Banner →
             </Link>
           </div>
         </div>

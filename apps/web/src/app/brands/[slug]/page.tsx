@@ -156,6 +156,9 @@ export default function BrandStorefrontPage() {
                   <span>•</span>
                   <span className={styles.metaItem}>{brand?.city || 'Lahore, Pakistan'}</span>
                 </div>
+                {brand?.description && (
+                  <p className={styles.heroBrandBio}>{brand.description}</p>
+                )}
               </div>
             </div>
 
@@ -228,11 +231,6 @@ export default function BrandStorefrontPage() {
           <div className={styles.itemCountText}>
             Showing <strong>{displayedProducts.length}</strong> creations from {brandName}
           </div>
-          {brand?.description && (
-            <p style={{ fontSize: '0.85rem', color: '#666', maxWidth: '600px', textAlign: 'right', margin: 0 }}>
-              {brand.description}
-            </p>
-          )}
         </div>
 
         {/* 4-Column Product Grid Matching Homepage ProductCard */}
@@ -268,6 +266,51 @@ export default function BrandStorefrontPage() {
             );
           })}
         </div>
+
+        {/* Brand Heritage & Atelier Story Section */}
+        {(brand?.description || brand?.story) && (
+          <section className={styles.atelierStorySection} aria-label="Brand Atelier Heritage">
+            <div className={styles.atelierStoryCard}>
+              <div className={styles.atelierHeader}>
+                <span className={styles.atelierKicker}>Verified Artisan Atelier</span>
+                <h2 className={styles.atelierTitle}>The Craftsmanship Behind {brandName}</h2>
+              </div>
+              {brand?.description && (
+                <p className={styles.atelierDescription}>
+                  {brand.description}
+                </p>
+              )}
+              {brand?.story && brand.story !== brand.description && (
+                <p className={styles.atelierStoryText}>
+                  {brand.story}
+                </p>
+              )}
+              <div className={styles.atelierTrustTags}>
+                <div className={styles.trustTagItem}>
+                  <span className={styles.trustTagIcon}>🛡️</span>
+                  <div>
+                    <strong>100% Authentic Creations</strong>
+                    <small>Directly curated from verified workshop</small>
+                  </div>
+                </div>
+                <div className={styles.trustTagItem}>
+                  <span className={styles.trustTagIcon}>✨</span>
+                  <div>
+                    <strong>Handcrafted & Small-Batch</strong>
+                    <small>Formulated with premium artisanal grade ingredients</small>
+                  </div>
+                </div>
+                <div className={styles.trustTagItem}>
+                  <span className={styles.trustTagIcon}>📦</span>
+                  <div>
+                    <strong>Nationwide Cash on Delivery</strong>
+                    <small>Dispatched safely with tracked delivery</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Bottom Platform Discovery Banner */}
         <div className={styles.bottomPlatformCard}>
