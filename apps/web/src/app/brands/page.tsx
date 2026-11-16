@@ -96,7 +96,7 @@ export default function BrandsDirectoryPage() {
             city: b.origin,
             specialty: b.category,
             bio: b.focus,
-            bannerImage: b.image,
+            bannerImage: b.bannerUrl || b.image,
             formulationCount: b.productCount,
           }));
           setBrands(mapped);
@@ -137,6 +137,7 @@ export default function BrandsDirectoryPage() {
                   src={brand.bannerImage}
                   alt={brand.name}
                   fill
+                  unoptimized
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className={styles.bannerImg}
                 />

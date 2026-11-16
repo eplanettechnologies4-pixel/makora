@@ -63,9 +63,10 @@ export default function BrandRail() {
           {brands.map((b) => {
             if (!b) return null;
             const brandSlug = b.slug || b.name?.toLowerCase().replace(/\s+/g, '-') || 'brand';
-            const imgSrc = failedImages[brandSlug] || !b.image
+            const cardImage = b.bannerUrl || b.image;
+            const imgSrc = failedImages[brandSlug] || !cardImage
               ? getBrandFallbackCover(brandSlug)
-              : b.image;
+              : cardImage;
 
             return (
               <div key={brandSlug} className={styles.brandCard} id={`brand-card-${brandSlug}`}>
@@ -75,6 +76,7 @@ export default function BrandRail() {
                     src={imgSrc}
                     alt={`${b.name || 'Brand'} Storefront`}
                     fill
+                    unoptimized
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     className={styles.bannerImage}
                     onError={() => setFailedImages((prev) => ({ ...prev, [brandSlug]: true }))}

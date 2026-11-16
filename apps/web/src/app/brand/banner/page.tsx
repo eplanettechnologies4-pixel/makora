@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { getMyBrandAction, updateMyBrandProfileAction } from '../../../lib/supabase/actions';
+import { getMyBrandAction, updateMyBrandProfileAction, uploadBrandAssetAction } from '../../../lib/supabase/actions';
 import ShopifyShell from '../../../components/brand/ShopifyShell';
 import styles from '../products/shopify-product.module.css';
 
@@ -41,6 +41,8 @@ export default function BrandBannerPage() {
   const [brand, setBrand] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [bannerUrl, setBannerUrl] = useState('');
@@ -50,6 +52,48 @@ export default function BrandBannerPage() {
   const [city, setCity] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [instagram, setInstagram] = useState('');
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingBanner(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'banners');
+      const res = await uploadBrandAssetAction(formData);
+      if (res.ok) {
+        setBannerUrl(res.data.url);
+      } else {
+        alert(res.error || 'Failed to upload banner image.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Banner upload failed');
+    } finally {
+      setIsUploadingBanner(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingLogo(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'logos');
+      const res = await uploadBrandAssetAction(formData);
+      if (res.ok) {
+        setLogoUrl(res.data.url);
+      } else {
+        alert(res.error || 'Failed to upload logo image.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Logo upload failed');
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading) {
@@ -206,33 +250,30 @@ export default function BrandBannerPage() {
                 <label style={{
                   fontSize: '0.75rem',
                   fontWeight: 600,
-                  color: '#008060',
-                  cursor: 'pointer',
+                  color: isUploadingBanner ? '#b38b4d' : '#008060',
+                  cursor: isUploadingBanner ? 'wait' : 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
                 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                  </svg>
-                  Upload from Device
+                  {isUploadingBanner ? (
+                    <span>Uploading image...</span>
+                  ) : (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                      Upload from Device
+                    </>
+                  )}
                   <input
                     type="file"
                     accept="image/*"
+                    disabled={isUploadingBanner}
                     style={{ display: 'none' }}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        if (typeof reader.result === 'string') {
-                          setBannerUrl(reader.result);
-                        }
-                      };
-                      reader.readAsDataURL(file);
-                    }}
+                    onChange={handleBannerUpload}
                   />
                 </label>
               </div>
@@ -298,33 +339,30 @@ export default function BrandBannerPage() {
                   <label style={{
                     fontSize: '0.75rem',
                     fontWeight: 600,
-                    color: '#008060',
-                    cursor: 'pointer',
+                    color: isUploadingLogo ? '#b38b4d' : '#008060',
+                    cursor: isUploadingLogo ? 'wait' : 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '4px',
                   }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="17 8 12 3 7 8" />
-                      <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    Upload from Device
+                    {isUploadingLogo ? (
+                      <span>Uploading logo...</span>
+                    ) : (
+                      <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        Upload from Device
+                      </>
+                    )}
                     <input
                       type="file"
                       accept="image/*"
+                      disabled={isUploadingLogo}
                       style={{ display: 'none' }}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          if (typeof reader.result === 'string') {
-                            setLogoUrl(reader.result);
-                          }
-                        };
-                        reader.readAsDataURL(file);
-                      }}
+                      onChange={handleLogoUpload}
                     />
                   </label>
                 </div>

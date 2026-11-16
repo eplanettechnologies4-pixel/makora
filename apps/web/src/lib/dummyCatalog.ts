@@ -6,6 +6,7 @@ export interface MarketplaceBrandCard {
   focus: string;
   productCount: number;
   image: string;
+  bannerUrl?: string;
   logoUrl?: string;
   isReal?: boolean;
 }

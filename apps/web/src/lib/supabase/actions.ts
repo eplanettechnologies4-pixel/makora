@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { AuthUser, BrandStatus, BusinessType, DocumentType, UserRole } from '@makaura/shared';
 import { createServerSupabaseClient } from './server';
 import { createAdminSupabaseClient } from './admin';
@@ -1185,14 +1186,45 @@ export async function updateMyBrandProfileAction(input: {
     };
   }
 
+  // Helper to safely handle base64 image strings if passed directly
+  const uploadBase64IfPresent = async (dataUri: string, prefix: string): Promise<string> => {
+    if (!dataUri || !dataUri.startsWith('data:image/')) return dataUri;
+    try {
+      const match = dataUri.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+      if (!match) return dataUri;
+      const mimeSub = match[1];
+      const base64Data = match[2];
+      const buffer = Buffer.from(base64Data, 'base64');
+      const ext = mimeSub === 'jpeg' ? 'jpg' : mimeSub;
+      const fileName = `${prefix}/${brand.id}-${Date.now()}.${ext}`;
+      const { error: uploadErr } = await admin.storage
+        .from('brand-assets')
+        .upload(fileName, buffer, {
+          contentType: `image/${mimeSub}`,
+          upsert: true,
+        });
+      if (!uploadErr) {
+        const { data: pubData } = admin.storage.from('brand-assets').getPublicUrl(fileName);
+        if (pubData?.publicUrl) return pubData.publicUrl;
+      }
+    } catch (err) {
+      console.warn('Failed to convert base64 brand asset:', err);
+    }
+    return dataUri;
+  };
+
   const updatePayload: Record<string, any> = {};
   if (input.description !== undefined) updatePayload.description = input.description;
   if (input.story !== undefined) updatePayload.story = input.story;
   if (input.websiteUrl !== undefined) updatePayload.websiteUrl = input.websiteUrl;
   if (input.city !== undefined) updatePayload.city = input.city;
   if (input.businessAddress !== undefined) updatePayload.businessAddress = input.businessAddress;
-  if (input.logoUrl !== undefined) updatePayload.logoUrl = input.logoUrl;
-  if (input.bannerUrl !== undefined) updatePayload.bannerUrl = input.bannerUrl;
+  if (input.logoUrl !== undefined) {
+    updatePayload.logoUrl = await uploadBase64IfPresent(input.logoUrl, 'logos');
+  }
+  if (input.bannerUrl !== undefined) {
+    updatePayload.bannerUrl = await uploadBase64IfPresent(input.bannerUrl, 'banners');
+  }
   if (input.country !== undefined) updatePayload.country = input.country;
   if (input.socialLinks !== undefined) updatePayload.socialLinks = input.socialLinks;
 
@@ -1207,7 +1239,57 @@ export async function updateMyBrandProfileAction(input: {
     return { ok: false, error: error.message, status: 500 };
   }
 
+  try {
+    revalidatePath('/');
+    revalidatePath('/brands');
+    if (updated?.slug) {
+      revalidatePath(`/brands/${updated.slug}`);
+    }
+  } catch (revalErr) {
+    // Ignore outside active RSC request context
+  }
+
   return { ok: true, data: updated };
+}
+
+export async function uploadBrandAssetAction(formData: FormData): Promise<ActionResult<{ url: string }>> {
+  const admin = createAdminSupabaseClient();
+  if (!admin) {
+    return { ok: false, error: getSafeUserClientError(), status: 503 };
+  }
+
+  const file = formData.get('file') as File | null;
+  const folder = (formData.get('folder') as string) || 'banners';
+
+  if (!file) {
+    return { ok: false, error: 'No file provided', status: 400 };
+  }
+
+  try {
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const ext = file.name ? file.name.split('.').pop() || 'jpg' : 'jpg';
+    const cleanExt = ext.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'jpg';
+    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${cleanExt}`;
+
+    const { error: uploadError } = await admin.storage
+      .from('brand-assets')
+      .upload(fileName, buffer, {
+        contentType: file.type || 'image/jpeg',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error('Supabase storage upload error:', uploadError);
+      return { ok: false, error: uploadError.message, status: 500 };
+    }
+
+    const { data: pubData } = admin.storage.from('brand-assets').getPublicUrl(fileName);
+    return { ok: true, data: { url: pubData.publicUrl } };
+  } catch (err: any) {
+    console.error('Failed to upload brand asset:', err);
+    return { ok: false, error: err.message || 'Upload failed', status: 500 };
+  }
 }
 
 // ============================================================================
@@ -2900,28 +2982,38 @@ export async function getMarketplaceBrandsAction(targetCount: number = 4): Promi
     if (!error && dbBrands && dbBrands.length > 0) {
       const { data: prodCounts } = await admin
         .from('products')
-        .select('brandId')
+        .select('brandId, images')
         .eq('status', 'ACTIVE');
 
       const countMap: Record<string, number> = {};
+      const firstProductImageMap: Record<string, string> = {};
       prodCounts?.forEach((p: any) => {
-        if (p.brandId) countMap[p.brandId] = (countMap[p.brandId] || 0) + 1;
+        if (p.brandId) {
+          countMap[p.brandId] = (countMap[p.brandId] || 0) + 1;
+          if (!firstProductImageMap[p.brandId] && Array.isArray(p.images) && p.images[0]) {
+            firstProductImageMap[p.brandId] = p.images[0];
+          }
+        }
       });
 
-      realBrands = dbBrands.map((b: any) => ({
-        name: b.name,
-        slug: b.slug,
-        origin: b.city ? `${b.city}, PK` : 'Pakistan',
-        category: b.businessType ? b.businessType.replace(/_/g, ' ') : 'Verified Brand',
-        focus:
-          b.description ||
-          b.story ||
-          'Handcrafted luxury, bespoke formulations, and authentic Pakistani craftsmanship.',
-        productCount: countMap[b.id] || 0,
-        image: b.bannerUrl || b.logoUrl || '',
-        logoUrl: b.logoUrl,
-        isReal: true,
-      }));
+      realBrands = dbBrands.map((b: any) => {
+        const brandImage = b.bannerUrl || firstProductImageMap[b.id] || b.logoUrl || '';
+        return {
+          name: b.name,
+          slug: b.slug,
+          origin: b.city ? `${b.city}, PK` : 'Pakistan',
+          category: b.businessType ? b.businessType.replace(/_/g, ' ') : 'Verified Brand',
+          focus:
+            b.description ||
+            b.story ||
+            'Handcrafted luxury, bespoke formulations, and authentic Pakistani craftsmanship.',
+          productCount: countMap[b.id] || 0,
+          image: brandImage,
+          bannerUrl: b.bannerUrl || brandImage,
+          logoUrl: b.logoUrl,
+          isReal: true,
+        };
+      });
     }
   }
 
