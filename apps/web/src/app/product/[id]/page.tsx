@@ -135,7 +135,9 @@ export default function SingleProductPage() {
   const router = useRouter();
   const { addItem } = useCart();
   const productId = (params?.id as string) || 'prod-saffron-rose';
-  const [product, setProduct] = useState<StoreOwnerProductDetails>(() => getProductById(productId));
+  const initialProduct = getProductById(productId);
+  const [product, setProduct] = useState<StoreOwnerProductDetails | null>(() => initialProduct);
+  const [isLoading, setIsLoading] = useState<boolean>(() => !initialProduct);
 
   // Interactive Gallery Carousel State
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
@@ -148,7 +150,7 @@ export default function SingleProductPage() {
   const [showShareToast, setShowShareToast] = useState(false);
 
   // Review System States
-  const [reviewsList, setReviewsList] = useState<ProductReview[]>(product.reviews || []);
+  const [reviewsList, setReviewsList] = useState<ProductReview[]>(initialProduct?.reviews || []);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReviewAuthor, setNewReviewAuthor] = useState('');
   const [newReviewCity, setNewReviewCity] = useState('');
@@ -163,27 +165,69 @@ export default function SingleProductPage() {
     setShowReviewForm(false);
     setReviewSubmittedNotice(false);
 
+    const immediate = getProductById(productId);
+    if (immediate) {
+      setProduct(immediate);
+      setIsLoading(false);
+      const popIdx = immediate.sizes?.findIndex((s: any) => s.isPopular);
+      setSelectedSizeIndex(popIdx >= 0 ? popIdx : 0);
+      if (immediate.reviews && immediate.reviews.length > 0) {
+        setReviewsList(immediate.reviews);
+      }
+    } else {
+      setIsLoading(true);
+    }
+
     getMarketplaceProductByIdAction(productId)
       .then((res) => {
         if (res.ok && res.data) {
-          setProduct(res.data as StoreOwnerProductDetails);
-          const popIdx = res.data.sizes?.findIndex((s: any) => s.isPopular);
+          const raw = res.data;
+          const imagesList =
+            Array.isArray(raw.images) && raw.images.length > 0
+              ? raw.images
+              : Array.isArray(raw.gallery) && raw.gallery.length > 0
+              ? raw.gallery
+              : ['https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80'];
+
+          const sizesList =
+            Array.isArray(raw.sizes) && raw.sizes.length > 0
+              ? raw.sizes
+              : [{ label: 'Standard Edition', volume: '1 Unit', price: raw.price || 4500, isPopular: true }];
+
+          const normalized = {
+            ...raw,
+            images: imagesList,
+            gallery: imagesList,
+            sizes: sizesList,
+            categoryLabel:
+              raw.categoryLabel ||
+              (raw.category
+                ? raw.category.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+                : 'Curated Formulation'),
+          };
+          setProduct(normalized as StoreOwnerProductDetails);
+          const popIdx = sizesList.findIndex((s: any) => s.isPopular);
           setSelectedSizeIndex(popIdx >= 0 ? popIdx : 0);
-          if (res.data.reviews && res.data.reviews.length > 0) {
-            setReviewsList(res.data.reviews);
+          if (raw.reviews && raw.reviews.length > 0) {
+            setReviewsList(raw.reviews);
           }
         } else {
           const fallback = getProductById(productId);
-          setProduct(fallback);
-          const popIdx = fallback.sizes.findIndex((s) => s.isPopular);
-          setSelectedSizeIndex(popIdx >= 0 ? popIdx : 0);
-          setReviewsList(fallback.reviews || []);
+          if (fallback) {
+            setProduct(fallback);
+            const popIdx = fallback.sizes?.findIndex((s) => s.isPopular) ?? 0;
+            setSelectedSizeIndex(popIdx >= 0 ? popIdx : 0);
+            setReviewsList(fallback.reviews || []);
+          }
         }
       })
       .catch((err) => {
         console.warn('Failed to fetch product by id:', err);
         const fallback = getProductById(productId);
-        setProduct(fallback);
+        if (fallback) setProduct(fallback);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
 
     if (typeof window !== 'undefined') {
@@ -191,8 +235,21 @@ export default function SingleProductPage() {
     }
   }, [productId]);
 
-  const currentPrice = product.sizes[selectedSizeIndex]?.price || product.price;
-  const currentCompareAt = product.compareAtPrice;
+  const rawGallery = (product as any)?.gallery;
+  const productImages: string[] =
+    Array.isArray(product?.images) && product.images.length > 0
+      ? product.images
+      : Array.isArray(rawGallery) && rawGallery.length > 0
+      ? (rawGallery as string[])
+      : ['https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80'];
+
+  const productSizes =
+    Array.isArray(product?.sizes) && product.sizes.length > 0
+      ? product.sizes
+      : [{ volume: 'Standard', label: 'Standard Edition', price: product?.price || 0, isPopular: true }];
+
+  const currentPrice = productSizes[selectedSizeIndex]?.price || product?.price || 0;
+  const currentCompareAt = product?.compareAtPrice;
   const discountPercent =
     currentCompareAt && currentCompareAt > currentPrice
       ? Math.round(((currentCompareAt - currentPrice) / currentCompareAt) * 100)
@@ -200,11 +257,11 @@ export default function SingleProductPage() {
 
   // Carousel Controls
   const handlePrevImage = () => {
-    setCurrentImgIndex((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
+    setCurrentImgIndex((prev) => (prev === 0 ? productImages.length - 1 : prev - 1));
   };
 
   const handleNextImage = () => {
-    setCurrentImgIndex((prev) => (prev + 1) % product.images.length);
+    setCurrentImgIndex((prev) => (prev + 1) % productImages.length);
   };
 
   const handleQuantityChange = (delta: number) => {
@@ -218,8 +275,8 @@ export default function SingleProductPage() {
       brandName: product.brandName,
       brandSlug: product.brandSlug,
       price: currentPrice,
-      image: product.images[0],
-      volume: product.sizes[selectedSizeIndex]?.volume,
+      image: productImages[0],
+      volume: productSizes[selectedSizeIndex]?.volume,
     }, quantity);
     setAddedNotice(true);
     setTimeout(() => setAddedNotice(false), 3500);
@@ -233,8 +290,8 @@ export default function SingleProductPage() {
       brandName: product.brandName,
       brandSlug: product.brandSlug,
       price: currentPrice,
-      image: product.images[0],
-      volume: product.sizes[selectedSizeIndex]?.volume,
+      image: productImages[0],
+      volume: productSizes[selectedSizeIndex]?.volume,
     }, quantity);
     router.push('/checkout');
   };
@@ -269,6 +326,70 @@ export default function SingleProductPage() {
     setTimeout(() => setReviewSubmittedNotice(false), 5000);
   };
 
+  if (isLoading || !product) {
+    return (
+      <div className={styles.pageRoot}>
+        {/* Breadcrumb Skeleton */}
+        <nav className={styles.breadcrumbsBar} aria-label="Breadcrumb Skeleton">
+          <div className="container">
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div style={{ width: '45px', height: '14px', background: '#E2E8F0', borderRadius: '4px' }} />
+              <span className={styles.sep}>/</span>
+              <div style={{ width: '90px', height: '14px', background: '#E2E8F0', borderRadius: '4px' }} />
+              <span className={styles.sep}>/</span>
+              <div style={{ width: '130px', height: '14px', background: '#E2E8F0', borderRadius: '4px' }} />
+            </div>
+          </div>
+        </nav>
+
+        {/* Main Product Section Skeleton */}
+        <main className={styles.mainProductSection}>
+          <div className="container">
+            <div className={styles.heroGrid}>
+              {/* Left Column Skeleton */}
+              <div className={styles.leftColumn}>
+                <div className={styles.galleryWrapper}>
+                  <div className={styles.thumbnailRail}>
+                    {[0, 1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        style={{
+                          width: '74px',
+                          height: '92px',
+                          background: '#E2E8F0',
+                          borderRadius: '8px',
+                          marginBottom: '8px',
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <div
+                    style={{
+                      flex: 1,
+                      aspectRatio: '1 / 1.15',
+                      background: '#E2E8F0',
+                      borderRadius: '16px',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Right Column Skeleton */}
+              <div className={styles.rightColumn}>
+                <div style={{ width: '130px', height: '16px', background: '#E2E8F0', borderRadius: '4px', marginBottom: '12px' }} />
+                <div style={{ width: '90%', height: '32px', background: '#E2E8F0', borderRadius: '6px', marginBottom: '10px' }} />
+                <div style={{ width: '65%', height: '24px', background: '#E2E8F0', borderRadius: '6px', marginBottom: '22px' }} />
+                <div style={{ width: '140px', height: '36px', background: '#E2E8F0', borderRadius: '6px', marginBottom: '24px' }} />
+                <div style={{ width: '100%', height: '52px', background: '#E2E8F0', borderRadius: '8px', marginBottom: '14px' }} />
+                <div style={{ width: '100%', height: '52px', background: '#E2E8F0', borderRadius: '8px' }} />
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.pageRoot}>
       {/* 1. Breadcrumbs */}
@@ -296,7 +417,7 @@ export default function SingleProductPage() {
               <div className={styles.galleryWrapper}>
                 {/* Vertical Thumbnail Rail */}
                 <div className={styles.thumbnailRail} role="tablist" aria-label="Product thumbnails">
-                  {product.images.map((img, idx) => (
+                  {productImages.map((img, idx) => (
                     <button
                       key={idx}
                       type="button"
@@ -319,7 +440,7 @@ export default function SingleProductPage() {
                 {/* Main Carousel Image Frame with Navigation Arrows */}
                 <div className={styles.mainImageFrame}>
                   <Image
-                    src={product.images[currentImgIndex] || product.images[0]}
+                    src={productImages[currentImgIndex] || productImages[0]}
                     alt={product.name}
                     fill
                     priority
@@ -364,7 +485,7 @@ export default function SingleProductPage() {
 
                   {/* Carousel Dot Indicators */}
                   <div className={styles.carouselDotsRow}>
-                    {product.images.map((_, dotIdx) => (
+                    {productImages.map((_, dotIdx) => (
                       <button
                         key={dotIdx}
                         type="button"
@@ -386,41 +507,43 @@ export default function SingleProductPage() {
               </div>
 
               {/* Styling Videos (Clean & Video-Only — Hidden Details Under Video) */}
-              <section className={styles.videosSection} aria-label="Styling & Application Videos">
-                <div className={styles.sectionHeaderSmall}>
-                  <h3 className={styles.videoHeading}>Styling Videos</h3>
-                  <span className={styles.videoCount}>4 formulation reels</span>
-                </div>
+              {Array.isArray(product.videos) && product.videos.length > 0 && (
+                <section className={styles.videosSection} aria-label="Styling & Application Videos">
+                  <div className={styles.sectionHeaderSmall}>
+                    <h3 className={styles.videoHeading}>Styling Videos</h3>
+                    <span className={styles.videoCount}>{product.videos.length} formulation reels</span>
+                  </div>
 
-                <div className={styles.videosGrid}>
-                  {product.videos.map((vid, idx) => (
-                    <div
-                      key={idx}
-                      className={styles.videoCard}
-                      onClick={() => alert(`Playing application reel: "${vid.title}"`)}
-                      title={`Play: ${vid.title}`}
-                    >
-                      <div className={styles.videoThumbFrame}>
-                        <Image
-                          src={vid.thumb}
-                          alt={vid.title}
-                          fill
-                          sizes="180px"
-                          className={styles.videoImg}
-                        />
-                        <div className={styles.playOverlay}>
-                          <div className={styles.playCircle}>
-                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                              <polygon points="5 3 19 12 5 21 5 3" />
-                            </svg>
+                  <div className={styles.videosGrid}>
+                    {product.videos.map((vid, idx) => (
+                      <div
+                        key={idx}
+                        className={styles.videoCard}
+                        onClick={() => alert(`Playing application reel: "${vid.title}"`)}
+                        title={`Play: ${vid.title}`}
+                      >
+                        <div className={styles.videoThumbFrame}>
+                          <Image
+                            src={vid.thumb}
+                            alt={vid.title}
+                            fill
+                            sizes="180px"
+                            className={styles.videoImg}
+                          />
+                          <div className={styles.playOverlay}>
+                            <div className={styles.playCircle}>
+                              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                              </svg>
+                            </div>
+                            <span className={styles.durationTag}>{vid.duration}</span>
                           </div>
-                          <span className={styles.durationTag}>{vid.duration}</span>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {/* Ratings and Reviews with "+ Write a Review" Option */}
               <section className={styles.reviewsSection} aria-label="Customer Ratings and Reviews">
@@ -704,11 +827,11 @@ export default function SingleProductPage() {
               <div className={styles.sizeSection}>
                 <div className={styles.sizeHeader}>
                   <span className={styles.sizeTitle}>SIZE</span>
-                  <span className={styles.sizeActiveLabel}>{product.sizes[selectedSizeIndex]?.label}</span>
+                  <span className={styles.sizeActiveLabel}>{productSizes[selectedSizeIndex]?.label}</span>
                 </div>
 
                 <div className={styles.sizePillsGroup}>
-                  {product.sizes.map((s, idx) => (
+                  {productSizes.map((s, idx) => (
                     <button
                       key={idx}
                       type="button"
@@ -821,31 +944,35 @@ export default function SingleProductPage() {
               </div>
 
               {/* Minimalist Product Details Table (Details Added By Store Owner) */}
-              <div className={styles.storeOwnerDetailsBlock}>
-                <h3 className={styles.detailsBlockHeading}>Product Details</h3>
-                <div className={styles.specsTable}>
-                  {product.specs.map((row, idx) => (
-                    <div key={idx} className={styles.specsRow}>
-                      <span className={styles.specLabel}>{row.label}</span>
-                      <span className={styles.specValue}>{row.value}</span>
-                    </div>
-                  ))}
+              {Array.isArray(product.specs) && product.specs.length > 0 && (
+                <div className={styles.storeOwnerDetailsBlock}>
+                  <h3 className={styles.detailsBlockHeading}>Product Details</h3>
+                  <div className={styles.specsTable}>
+                    {product.specs.map((row, idx) => (
+                      <div key={idx} className={styles.specsRow}>
+                        <span className={styles.specLabel}>{row.label}</span>
+                        <span className={styles.specValue}>{row.value}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Minimalist Description & Protocol (No AI Clutter) */}
               <div className={styles.minimalistDescriptionBlock}>
                 <h3 className={styles.detailsBlockHeading}>Description &amp; Ritual</h3>
                 <p className={styles.descText}>{product.description}</p>
 
-                <div className={styles.ritualBox}>
-                  <strong>How to Apply:</strong>
-                  <ul>
-                    {product.ritualBullets.map((b, i) => (
-                      <li key={i}>{b}</li>
-                    ))}
-                  </ul>
-                </div>
+                {Array.isArray(product.ritualBullets) && product.ritualBullets.length > 0 && (
+                  <div className={styles.ritualBox}>
+                    <strong>How to Apply:</strong>
+                    <ul>
+                      {product.ritualBullets.map((b, i) => (
+                        <li key={i}>{b}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <div className={styles.inciBox}>
                   <strong>Full Ingredients (INCI):</strong>

@@ -92,49 +92,6 @@ export default function BrandLoginPage() {
           </div>
         )}
 
-        <div style={{
-          background: '#faf8f5',
-          border: '1px solid #ebd9c3',
-          borderRadius: '8px',
-          padding: '0.875rem 1rem',
-          marginBottom: '1.25rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '0.75rem',
-        }}>
-          <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#b38b4d', textTransform: 'uppercase' }}>
-              Quick Demo Login
-            </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1a1a1a' }}>
-              Adan's Libas (LAAM Reference Store)
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setFormData({
-                email: 'store@adanslibas.com',
-                password: 'StoreOwner2026!Secure',
-              });
-            }}
-            style={{
-              padding: '0.4rem 0.85rem',
-              background: '#1a1a1a',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Fill Credentials
-          </button>
-        </div>
-
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
           <div className={styles.formGroup}>
             <label htmlFor="email" className={styles.label}>
@@ -146,7 +103,7 @@ export default function BrandLoginPage() {
               type="email"
               required
               className={styles.input}
-              placeholder="founder@yourbrand.com"
+              placeholder="Enter your partner email address"
               value={formData.email}
               onChange={handleChange}
               disabled={isLoading}
@@ -163,7 +120,7 @@ export default function BrandLoginPage() {
               type="password"
               required
               className={styles.input}
-              placeholder="Enter your partner password"
+              placeholder="Enter your password"
               value={formData.password}
               onChange={handleChange}
               disabled={isLoading}

@@ -1073,113 +1073,96 @@ export const PRODUCTS_DATABASE: Record<string, StoreOwnerProductDetails> = {
   },
 };
 
-export function getProductById(id: string): StoreOwnerProductDetails {
+import storeCatalogData from './store_catalog.json';
+
+function mapStoreProductToDetails(p: any): StoreOwnerProductDetails {
+  const images = Array.isArray(p.images) && p.images.length > 0
+    ? p.images
+    : ['https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80'];
+
+  return {
+    id: p.id,
+    name: p.title,
+    brandName: p.brandName || "Adan's Libas",
+    brandSlug: p.brandSlug || 'adans-libas',
+    brandRating: p.rating || 4.9,
+    brandItemsSold: 350,
+    sku: p.sku || `MKR-${p.id.toUpperCase()}`,
+    price: Number(p.price) || 0,
+    compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : undefined,
+    rating: Number(p.rating) || 4.9,
+    reviewCount: p.reviewCount || 24,
+    badge: p.compareAtPrice && p.compareAtPrice > p.price ? 'Special Price' : 'Featured Pret',
+    category: p.category || 'pret',
+    categoryLabel: p.categoryLabel || 'Luxury Pret',
+    images,
+    sizes: [
+      { volume: 'Standard', label: 'Standard Edition (Ready to Ship)', price: Number(p.price) || 0, isPopular: true },
+    ],
+    videos: [],
+    specs: [
+      { label: 'Craftsmanship', value: '100% Authentic Handcrafted' },
+      { label: 'Fabric Details', value: p.fabricDetails || 'Pure Handcrafted Pakistani Textiles' },
+      { label: 'Origin', value: 'Lahore, Pakistan' },
+      { label: 'Delivery', value: 'Nationwide Cash on Delivery (COD)' },
+    ],
+    description: p.description || '',
+    ritualBullets: [
+      'Dry clean recommended to preserve handcrafted zardozi and thread embroidery.',
+      'Iron on low heat from reverse side.',
+      'Store in provided breathable luxury garment bag.',
+    ],
+    inci: p.fabricDetails || p.description || 'Authentic Pakistani Artisanal Craftsmanship',
+    note: 'Handcrafted by certified Pakistani master artisans. Limited batch availability.',
+    reviews: [
+      {
+        id: `rev-${p.id}`,
+        author: 'Verified Patron (Lahore)',
+        verified: true,
+        date: 'Recent',
+        stars: 5,
+        comment: `Exceptional fabric quality and master tailoring from ${p.brandName || "Adan's Libas"}. Delivered securely via Cash on Delivery.`,
+      },
+    ],
+  };
+}
+
+export function getProductById(id: string): StoreOwnerProductDetails | null {
   if (!id) return PRODUCTS_DATABASE['prod-saffron-rose'];
 
-  // 1. Direct match
+  // 1. Direct match in PRODUCTS_DATABASE
   if (PRODUCTS_DATABASE[id]) {
     return PRODUCTS_DATABASE[id];
   }
 
-  // 2. Normalized match (e.g. without prod- prefix or lowercase)
+  // 2. Normalized match in PRODUCTS_DATABASE
   const normId = id.toLowerCase().trim();
   const withPrefix = normId.startsWith('prod-') ? normId : `prod-${normId}`;
   if (PRODUCTS_DATABASE[withPrefix]) {
     return PRODUCTS_DATABASE[withPrefix];
   }
 
-  // Find by partial key
+  // 3. Match in store_catalog.json (Adan's Libas & other store products)
+  const storeProducts = (storeCatalogData as any)?.products || [];
+  const storeProd = storeProducts.find(
+    (p: any) =>
+      p.id === id ||
+      p.id === normId ||
+      p.id === withPrefix ||
+      p.slug === normId ||
+      p.slug === id.replace('prod-', '')
+  );
+  if (storeProd) {
+    return mapStoreProductToDetails(storeProd);
+  }
+
+  // 4. Find by partial key in PRODUCTS_DATABASE
   for (const key of Object.keys(PRODUCTS_DATABASE)) {
     if (key.includes(normId) || normId.includes(key.replace('prod-', ''))) {
       return PRODUCTS_DATABASE[key];
     }
   }
 
-  // 3. Dynamic synthesis fallback matching category & name from slug
-  const titleWords = normId
-    .replace('prod-', '')
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-
-  let category = 'skincare';
-  let categoryLabel = 'Curated Beauty Formulation';
-  let brandName = 'Maison de Rose';
-  let brandSlug = 'maison-de-rose';
-  let defaultPrice = 4500;
-
-  if (normId.includes('lip') || normId.includes('kohl') || normId.includes('rouge') || normId.includes('tint') || normId.includes('blush') || normId.includes('foundation')) {
-    category = 'makeup';
-    categoryLabel = 'Artisanal Cosmetics';
-    brandName = 'Noor Artisanal Cosmetics';
-    brandSlug = 'noor-artisanal';
-    defaultPrice = 3200;
-  } else if (normId.includes('oud') || normId.includes('attar') || normId.includes('perfume') || normId.includes('fragrance') || normId.includes('scent')) {
-    category = 'fragrance';
-    categoryLabel = 'Niche Fragrance & Rare Attars';
-    brandName = 'Aura Scents House';
-    brandSlug = 'aura-scents';
-    defaultPrice = 8500;
-  } else if (normId.includes('hair') || normId.includes('scalp') || normId.includes('tonic') || normId.includes('rosemary') || normId.includes('amla')) {
-    category = 'haircare';
-    categoryLabel = 'Botanical Scalp & Hair Rituals';
-    brandName = 'Botanica Raw Labs';
-    brandSlug = 'botanica-raw-labs';
-    defaultPrice = 3600;
-  } else if (normId.includes('body') || normId.includes('polish') || normId.includes('souffle') || normId.includes('bath')) {
-    category = 'bath-body';
-    categoryLabel = 'Bath & Body Rituals';
-    brandName = 'Indisense Rituals';
-    brandSlug = 'indisense-rituals';
-    defaultPrice = 4200;
-  }
-
-  return {
-    id: normId,
-    name: `${titleWords} Formulation`,
-    brandName,
-    brandSlug,
-    brandRating: 4.9,
-    brandItemsSold: 650,
-    sku: `MAK-${normId.slice(0, 6).toUpperCase()}-01`,
-    price: defaultPrice,
-    compareAtPrice: Math.round(defaultPrice * 1.15),
-    rating: 4.9,
-    reviewCount: 38,
-    badge: 'Artisanal Batch',
-    category,
-    categoryLabel,
-    images: [
-      'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=1000&q=95',
-      'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1000&q=95',
-      'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1000&q=95',
-      'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=95',
-      'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1000&q=95',
-    ],
-    sizes: [
-      { volume: 'Standard', label: 'Standard Size (Most Popular)', price: defaultPrice, isPopular: true },
-      { volume: 'Deluxe', label: 'Deluxe Value Size', price: Math.round(defaultPrice * 1.7) },
-    ],
-    videos: [
-      { title: 'Formulator Batch Inspection', duration: '0:35', thumb: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=400&q=80' },
-      { title: 'Application Ritual', duration: '0:42', thumb: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=400&q=80' },
-    ],
-    specs: [
-      { label: 'Formulation Type', value: `${categoryLabel} Handcrafted Batch` },
-      { label: 'Origin', value: `${brandName} Atelier, Pakistan` },
-      { label: 'Certifications', value: '100% Halal Certified, Cruelty-Free, Paraben-Free' },
-      { label: 'Shelf Life', value: '18 Months from Handcraft Date' },
-    ],
-    description: `An authentic formulation handcrafted by certified Pakistani formulators at ${brandName}. Pure botanicals and high-performance actives compounded under strict quality control.`,
-    ritualBullets: [
-      'Dispense desired amount onto clean skin or hair.',
-      'Massage gently in circular motions until fully absorbed.',
-    ],
-    inci: 'Aqua, Botanical Extracts, Plant Squalane, Tocopherol (Vitamin E), Natural Essential Oils.',
-    note: 'Crafted in limited small batches. Store in a cool dry place away from direct sunlight.',
-    reviews: [
-      { id: 'rev-d1', author: 'Verified Patron (Lahore)', verified: true, date: 'Nov 1, 2026', stars: 5, comment: `Exceptional quality from ${brandName}. Delivered securely via Cash on Delivery in 2 days.` },
-    ],
-  };
+  return null;
 }
 

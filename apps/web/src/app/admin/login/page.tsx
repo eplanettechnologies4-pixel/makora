@@ -106,7 +106,7 @@ export default function AdminLoginPage() {
               type="email"
               required
               className={styles.input}
-              placeholder="admin@makaura.com"
+              placeholder="Enter your administrator email"
               value={formData.email}
               onChange={handleChange}
               disabled={isLoading}
@@ -140,7 +140,7 @@ export default function AdminLoginPage() {
               type={showPassword ? 'text' : 'password'}
               required
               className={styles.input}
-              placeholder="••••••••••••"
+              placeholder="Enter your password"
               value={formData.password}
               onChange={handleChange}
               disabled={isLoading}
@@ -156,44 +156,6 @@ export default function AdminLoginPage() {
             {isLoading ? 'Verifying Credentials...' : 'Authenticate & Enter'}
           </button>
         </form>
-
-        {/* Quick Fill Helper */}
-        <div style={{ marginTop: '1.25rem', padding: '0.85rem', backgroundColor: '#fdfbf7', borderRadius: '8px', border: '1px solid #f1e5cc', textAlign: 'center' }}>
-          <p style={{ margin: '0 0 0.35rem 0', fontSize: '0.75rem', color: '#856404', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Master Admin Demo Credentials
-          </p>
-          <div style={{ fontSize: '0.8rem', color: '#374151', marginBottom: '0.65rem', lineHeight: '1.4' }}>
-            <div>Email: <strong style={{ color: '#111827' }}>admin@makaura.com</strong></div>
-            <div>Password: <strong style={{ color: '#111827' }}>admin123456</strong></div>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setFormData({ email: 'admin@makaura.com', password: 'admin123456' });
-              setErrorMessage(null);
-            }}
-            style={{
-              background: '#111827',
-              color: '#d4af37',
-              border: '1px solid #d4af37',
-              padding: '0.45rem 1rem',
-              borderRadius: '6px',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.4rem',
-            }}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#008060' }}>
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
-            <span>Click to Auto-Fill Credentials</span>
-          </button>
-        </div>
 
         <div className={styles.securityFooter} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
           <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
