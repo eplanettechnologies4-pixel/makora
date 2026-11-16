@@ -77,4 +77,3 @@ CREATE TABLE IF NOT EXISTS public.seller_orders (
 
 CREATE INDEX IF NOT EXISTS idx_seller_orders_brandId ON public.seller_orders("brandId");
 CREATE INDEX IF NOT EXISTS idx_seller_orders_status ON public.seller_orders("fulfillmentStatus");
-
