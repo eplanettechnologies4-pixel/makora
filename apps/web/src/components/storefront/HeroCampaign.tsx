@@ -41,7 +41,7 @@ export default function HeroCampaign() {
     return () => clearInterval(interval);
   }, [isPaused]);
 
-  const slide = CAMPAIGN_SLIDES[currentSlide];
+  const slide = CAMPAIGN_SLIDES[currentSlide] || CAMPAIGN_SLIDES[0];
 
   const handlePrev = (e: React.MouseEvent) => {
     e.preventDefault();

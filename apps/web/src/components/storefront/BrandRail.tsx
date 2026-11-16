@@ -17,7 +17,8 @@ const BRAND_COVER_FALLBACKS = [
   'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=700&q=80',
 ];
 
-function getBrandFallbackCover(slug: string): string {
+function getBrandFallbackCover(slug?: string): string {
+  if (!slug || typeof slug !== 'string') return BRAND_COVER_FALLBACKS[0];
   const code = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return BRAND_COVER_FALLBACKS[code % BRAND_COVER_FALLBACKS.length];
 }
@@ -60,40 +61,44 @@ export default function BrandRail() {
 
         <div className={styles.brandsGrid}>
           {brands.map((b) => {
-            const imgSrc = failedImages[b.slug] || !b.image
-              ? getBrandFallbackCover(b.slug)
+            if (!b) return null;
+            const brandSlug = b.slug || b.name?.toLowerCase().replace(/\s+/g, '-') || 'brand';
+            const imgSrc = failedImages[brandSlug] || !b.image
+              ? getBrandFallbackCover(brandSlug)
               : b.image;
 
             return (
-              <div key={b.slug} className={styles.brandCard} id={`brand-card-${b.slug}`}>
+              <div key={brandSlug} className={styles.brandCard} id={`brand-card-${brandSlug}`}>
                 {/* Store Cover Image */}
                 <div className={styles.bannerFrame}>
                   <Image
                     src={imgSrc}
-                    alt={`${b.name} Storefront`}
+                    alt={`${b.name || 'Brand'} Storefront`}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     className={styles.bannerImage}
-                    onError={() => setFailedImages((prev) => ({ ...prev, [b.slug]: true }))}
+                    onError={() => setFailedImages((prev) => ({ ...prev, [brandSlug]: true }))}
                   />
                   <div className={styles.bannerOverlay} />
                   <span className={styles.productCountBadge}>
-                    {b.productCount > 0 ? `${b.productCount} Creations` : 'Featured Partner'}
+                    {typeof b.productCount === 'number' && b.productCount > 0
+                      ? `${b.productCount} Creations`
+                      : 'Featured Partner'}
                   </span>
                 </div>
 
                 {/* Brand Info */}
                 <div className={styles.brandDetails}>
                   <div className={styles.metaRow}>
-                    <span className={styles.brandCategory}>{b.category}</span>
-                    <span className={styles.brandOrigin}>{b.origin}</span>
+                    <span className={styles.brandCategory}>{b.category || 'Verified Brand'}</span>
+                    <span className={styles.brandOrigin}>{b.origin || 'Pakistan'}</span>
                   </div>
 
                   <h3 className={styles.brandTitle}>{b.name}</h3>
                   <p className={styles.brandFocus}>{b.focus}</p>
 
                   <div className={styles.actionRow}>
-                    <Link href={`/brands/${b.slug}`} className={styles.visitStoreBtn}>
+                    <Link href={`/brands/${brandSlug}`} className={styles.visitStoreBtn}>
                       Visit Storefront
                     </Link>
                   </div>

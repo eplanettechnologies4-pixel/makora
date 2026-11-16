@@ -3,6 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   output: 'standalone',
+  experimental: {
+    serverComponentsExternalPackages: ['@supabase/supabase-js', '@supabase/ssr'],
+  },
   images: {
     remotePatterns: [
       {

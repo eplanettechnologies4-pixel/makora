@@ -35,11 +35,13 @@ export default function ProductCard({ product, onQuickAdd }: ProductCardProps) {
   const [addedNotice, setAddedNotice] = useState(false);
   const [imageSrc, setImageSrc] = useState(product.image || FALLBACK_BEAUTY_IMAGE);
 
+  const productPrice = typeof product.price === 'number' ? product.price : (Number(product.price) || 0);
+  const compareAt = typeof product.compareAtPrice === 'number' ? product.compareAtPrice : (product.compareAtPrice ? Number(product.compareAtPrice) : undefined);
   const productUrl = product.href || `/product/${product.id}`;
 
   const discountPercent =
-    product.compareAtPrice && product.compareAtPrice > product.price
-      ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
+    compareAt && compareAt > productPrice
+      ? Math.round(((compareAt - productPrice) / compareAt) * 100)
       : null;
 
   const handleQuickAdd = (e: React.MouseEvent) => {
@@ -51,7 +53,7 @@ export default function ProductCard({ product, onQuickAdd }: ProductCardProps) {
       name: product.name,
       brandName: product.brandName,
       brandSlug: product.brandSlug,
-      price: product.price,
+      price: productPrice,
       image: product.image,
     }, 1);
 
@@ -174,18 +176,18 @@ export default function ProductCard({ product, onQuickAdd }: ProductCardProps) {
         {/* Price Row */}
         <div className={styles.priceRow}>
           <span className={styles.price}>
-            Rs. {product.price.toLocaleString()}
+            Rs. {productPrice.toLocaleString()}
           </span>
-          {product.compareAtPrice && product.compareAtPrice > product.price && (
+          {compareAt && compareAt > productPrice ? (
             <span className={styles.compareAt}>
-              Rs. {product.compareAtPrice.toLocaleString()}
+              Rs. {compareAt.toLocaleString()}
             </span>
-          )}
-          {discountPercent && (
+          ) : null}
+          {discountPercent ? (
             <span className={styles.discountBadge}>
               {discountPercent}% OFF
             </span>
-          )}
+          ) : null}
         </div>
       </div>
     </article>

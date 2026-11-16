@@ -97,9 +97,10 @@ export default function FeaturedProducts() {
 
         {/* Product Grid */}
         <div className={styles.grid}>
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {filteredProducts.map((product) => {
+            if (!product || !product.id) return null;
+            return <ProductCard key={product.id} product={product} />;
+          })}
         </div>
       </div>
     </section>

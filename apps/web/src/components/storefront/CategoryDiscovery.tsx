@@ -47,23 +47,26 @@ export default function CategoryDiscovery() {
         {/* 14 Categories Responsive Grid (Clean Grid, No Carousel Cutoffs) */}
         <div className={styles.categoriesGrid}>
           {categories.map((cat) => {
-            const imgSrc = failedImages[cat.id] ? FALLBACK_CATEGORY_IMG : cat.image;
+            if (!cat) return null;
+            const catId = cat.id || cat.name || 'cat';
+            const imgSrc = failedImages[catId] || !cat.image ? FALLBACK_CATEGORY_IMG : cat.image;
+            const href = cat.href || (cat.id ? `/categories/${cat.id}` : '/shop');
             return (
               <Link 
-                key={cat.id} 
-                href={cat.href} 
+                key={catId} 
+                href={href} 
                 className={styles.categoryItem}
-                id={`cat-circle-${cat.id}`}
+                id={`cat-circle-${catId}`}
               >
                 <div className={styles.circleAvatar}>
                   <Image
                     src={imgSrc}
-                    alt={cat.name}
+                    alt={cat.name || 'Category'}
                     width={150}
                     height={150}
                     quality={95}
                     className={styles.avatarImg}
-                    onError={() => handleImageError(cat.id)}
+                    onError={() => handleImageError(catId)}
                   />
                 </div>
                 <span className={styles.categoryLabel}>{cat.name}</span>
