@@ -269,6 +269,7 @@ export default function SingleProductPage() {
   };
 
   const handleAddToBag = () => {
+    if (!product) return;
     addItem({
       id: product.id,
       name: product.name,
@@ -284,6 +285,7 @@ export default function SingleProductPage() {
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (!product) return;
     addItem({
       id: product.id,
       name: product.name,
@@ -326,7 +328,7 @@ export default function SingleProductPage() {
     setTimeout(() => setReviewSubmittedNotice(false), 5000);
   };
 
-  if (isLoading || !product) {
+  if (isLoading) {
     return (
       <div className={styles.pageRoot}>
         {/* Breadcrumb Skeleton */}
@@ -386,6 +388,20 @@ export default function SingleProductPage() {
             </div>
           </div>
         </main>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className={styles.pageRoot} style={{ padding: '80px 20px', textAlign: 'center' }}>
+        <div className="container">
+          <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#1E293B', marginBottom: '12px' }}>Product Not Found</h2>
+          <p style={{ color: '#64748B', marginBottom: '24px' }}>The product you are looking for does not exist or may have been removed.</p>
+          <Link href="/" style={{ display: 'inline-block', padding: '12px 28px', background: '#5B0629', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontWeight: 500 }}>
+            Back to Marketplace
+          </Link>
+        </div>
       </div>
     );
   }

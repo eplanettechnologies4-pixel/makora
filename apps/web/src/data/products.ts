@@ -1082,7 +1082,7 @@ function mapStoreProductToDetails(p: any): StoreOwnerProductDetails {
 
   return {
     id: p.id,
-    name: p.title,
+    name: p.title || p.name || 'Artisanal Piece',
     brandName: p.brandName || "Adan's Libas",
     brandSlug: p.brandSlug || 'adans-libas',
     brandRating: p.rating || 4.9,
