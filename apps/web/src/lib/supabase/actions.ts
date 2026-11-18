@@ -1292,6 +1292,49 @@ export async function uploadBrandAssetAction(formData: FormData): Promise<Action
   }
 }
 
+export async function changeMyPasswordAction(input: {
+  currentPassword?: string;
+  newPassword: string;
+}): Promise<ActionResult<{ success: boolean }>> {
+  const auth = await requireAuthenticatedUser();
+  if (!auth.ok) return auth;
+
+  const admin = createAdminSupabaseClient();
+  const supabase = createServerSupabaseClient();
+  if (!admin || !supabase) {
+    return { ok: false, error: getSafeUserClientError(), status: 503 };
+  }
+
+  const userId = auth.data.authUserId;
+  const userEmail = auth.data.profile.email;
+
+  if (!input.newPassword || input.newPassword.length < 8) {
+    return { ok: false, error: 'New password must be at least 8 characters long.', status: 400 };
+  }
+
+  // If current password provided, verify it first
+  if (input.currentPassword) {
+    const { error: verifyErr } = await supabase.auth.signInWithPassword({
+      email: userEmail,
+      password: input.currentPassword,
+    });
+    if (verifyErr) {
+      return { ok: false, error: 'Current password is incorrect. Please check your existing password.', status: 400 };
+    }
+  }
+
+  // Update password using admin client
+  const { error: updateErr } = await admin.auth.admin.updateUserById(userId, {
+    password: input.newPassword,
+  });
+
+  if (updateErr) {
+    return { ok: false, error: updateErr.message, status: 500 };
+  }
+
+  return { ok: true, data: { success: true } };
+}
+
 // ============================================================================
 // 4. ADMIN ACTIONS (BRAND APPLICATIONS REVIEW QUEUE & AUDIT TRAIL)
 // ============================================================================

@@ -5,8 +5,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { createBrandApplicationAction } from '../../../lib/supabase/actions';
+import { createBrandApplicationAction, uploadBrandAssetAction } from '../../../lib/supabase/actions';
 import styles from './brand-register.module.css';
+
+interface UploadedDoc {
+  url: string;
+  name: string;
+  size: number;
+  mimeType: string;
+}
 
 const STEPS = [
   { id: 1, label: 'Owner Account' },
@@ -29,6 +36,57 @@ export default function BrandRegisterPage() {
     status: string;
   } | null>(null);
 
+  // Password visibility states
+  const [showOwnerPassword, setShowOwnerPassword] = useState(false);
+  const [showOwnerConfirmPassword, setShowOwnerConfirmPassword] = useState(false);
+
+  // Document upload states
+  const [companyRegDoc, setCompanyRegDoc] = useState<UploadedDoc | null>(null);
+  const [cnicFrontDoc, setCnicFrontDoc] = useState<UploadedDoc | null>(null);
+  const [cnicBackDoc, setCnicBackDoc] = useState<UploadedDoc | null>(null);
+  const [ntnCertDoc, setNtnCertDoc] = useState<UploadedDoc | null>(null);
+  const [chequeLeafDoc, setChequeLeafDoc] = useState<UploadedDoc | null>(null);
+  const [uploadingDocKey, setUploadingDocKey] = useState<string | null>(null);
+
+  const handleFileUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    docKey: string,
+    setDoc: (doc: UploadedDoc | null) => void,
+    folder: string = 'documents'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorMessage(`File "${file.name}" exceeds 10MB limit.`);
+      return;
+    }
+
+    setUploadingDocKey(docKey);
+    setErrorMessage(null);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('folder', folder);
+
+      const res = await uploadBrandAssetAction(form);
+      if (res.ok) {
+        setDoc({
+          url: res.data.url,
+          name: file.name,
+          size: file.size,
+          mimeType: file.type || 'application/octet-stream',
+        });
+      } else {
+        setErrorMessage(res.error || 'Failed to upload document.');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Error uploading document');
+    } finally {
+      setUploadingDocKey(null);
+    }
+  };
+
   // Form State
   const [formData, setFormData] = useState({
     // Step 1: Owner
@@ -49,12 +107,11 @@ export default function BrandRegisterPage() {
     country: 'Pakistan',
     websiteUrl: '',
     instagramHandle: '',
-    logoUrl: '',
-    bannerUrl: '',
+    tiktokHandle: '',
+    facebookHandle: '',
 
     // Step 3: Verification
     businessRegNumber: '',
-    documentName: 'SECP_Certificate_2026.pdf',
 
     // Step 4: Banking
     bankName: 'Habib Bank Limited (HBL)',
@@ -186,6 +243,58 @@ export default function BrandRegisterPage() {
     setErrorMessage(null);
 
     try {
+      const socialLinks: Record<string, string> = {};
+      if (formData.instagramHandle.trim()) socialLinks.instagram = formData.instagramHandle.trim();
+      if (formData.tiktokHandle.trim()) socialLinks.tiktok = formData.tiktokHandle.trim();
+      if (formData.facebookHandle.trim()) socialLinks.facebook = formData.facebookHandle.trim();
+
+      const docs: any[] = [];
+      if (companyRegDoc) {
+        docs.push({
+          documentType: 'BUSINESS_REGISTRATION',
+          fileKey: companyRegDoc.url,
+          originalName: companyRegDoc.name,
+          mimeType: companyRegDoc.mimeType,
+          fileSize: companyRegDoc.size,
+        });
+      }
+      if (cnicFrontDoc) {
+        docs.push({
+          documentType: 'CNIC_FRONT',
+          fileKey: cnicFrontDoc.url,
+          originalName: cnicFrontDoc.name,
+          mimeType: cnicFrontDoc.mimeType,
+          fileSize: cnicFrontDoc.size,
+        });
+      }
+      if (cnicBackDoc) {
+        docs.push({
+          documentType: 'CNIC_BACK',
+          fileKey: cnicBackDoc.url,
+          originalName: cnicBackDoc.name,
+          mimeType: cnicBackDoc.mimeType,
+          fileSize: cnicBackDoc.size,
+        });
+      }
+      if (ntnCertDoc) {
+        docs.push({
+          documentType: 'NTN_CERTIFICATE',
+          fileKey: ntnCertDoc.url,
+          originalName: ntnCertDoc.name,
+          mimeType: ntnCertDoc.mimeType,
+          fileSize: ntnCertDoc.size,
+        });
+      }
+      if (chequeLeafDoc) {
+        docs.push({
+          documentType: 'CHEQUE_LEAF',
+          fileKey: chequeLeafDoc.url,
+          originalName: chequeLeafDoc.name,
+          mimeType: chequeLeafDoc.mimeType,
+          fileSize: chequeLeafDoc.size,
+        });
+      }
+
       const payload: any = {
         brandName: formData.brandName.trim(),
         brandSlug: formData.brandSlug.trim(),
@@ -195,17 +304,14 @@ export default function BrandRegisterPage() {
         city: formData.city.trim(),
         country: formData.country.trim() || 'Pakistan',
         websiteUrl: formData.websiteUrl.trim() || undefined,
-        socialLinks: formData.instagramHandle
-          ? { instagram: formData.instagramHandle.trim() }
-          : undefined,
-        logoUrl: formData.logoUrl.trim() || undefined,
-        bannerUrl: formData.bannerUrl.trim() || undefined,
+        socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : undefined,
         businessRegNumber: formData.businessRegNumber.trim() || undefined,
         bankName: formData.bankName.trim(),
         accountHolderName: formData.accountHolderName.trim(),
         accountNumber: formData.accountNumber.trim(),
         iban: formData.iban.trim() || undefined,
         branchCode: formData.branchCode.trim() || undefined,
+        documents: docs.length > 0 ? docs : undefined,
       };
 
       // Include owner account details if not logged in
@@ -239,6 +345,157 @@ export default function BrandRegisterPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const renderFileUploader = (
+    label: string,
+    docKey: string,
+    doc: UploadedDoc | null,
+    setDoc: (doc: UploadedDoc | null) => void,
+    helpText: string,
+    accept: string = 'image/*,application/pdf',
+    folder: string = 'documents'
+  ) => {
+    const isUploading = uploadingDocKey === docKey;
+
+    return (
+      <div className={styles.formGroup} style={{ marginBottom: '1.1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+          <label className={styles.label} style={{ margin: 0 }}>{label}</label>
+          {doc && (
+            <span style={{ color: '#16a34a', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Attached
+            </span>
+          )}
+        </div>
+
+        <div style={{
+          border: doc ? '1.5px solid #86efac' : '1.5px dashed #d1d5db',
+          background: doc ? '#f0fdf4' : '#fafafa',
+          borderRadius: '8px',
+          padding: '0.85rem 1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '0.75rem',
+        }}>
+          {doc ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+              <div style={{
+                width: 36,
+                height: 36,
+                borderRadius: 6,
+                background: '#dcfce7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#166534',
+                flexShrink: 0,
+              }}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#166534', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {doc.name}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#15803d', marginTop: '2px' }}>
+                  {(doc.size / 1024).toFixed(1)} KB • Uploaded to Secure Cloud
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{
+                width: 36,
+                height: 36,
+                borderRadius: 6,
+                background: '#f3f4f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#6b7280',
+                flexShrink: 0,
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151' }}>
+                  {isUploading ? 'Uploading file...' : 'No document selected'}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#6b7280', marginTop: '2px' }}>
+                  {helpText}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            {doc && (
+              <button
+                type="button"
+                onClick={() => setDoc(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#dc2626',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  padding: '0.3rem 0.5rem',
+                }}
+              >
+                Remove
+              </button>
+            )}
+
+            <label style={{
+              padding: '0.45rem 0.9rem',
+              background: isUploading ? '#9ca3af' : '#111827',
+              color: '#ffffff',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: isUploading ? 'wait' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap',
+            }}>
+              {isUploading ? (
+                <span>Uploading...</span>
+              ) : (
+                <>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  <span>{doc ? 'Change File' : 'Select File'}</span>
+                </>
+              )}
+              <input
+                type="file"
+                accept={accept}
+                disabled={isUploading}
+                style={{ display: 'none' }}
+                onChange={(e) => handleFileUpload(e, docKey, setDoc, folder)}
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // If already submitted, display confirmation screen
@@ -421,10 +678,30 @@ export default function BrandRegisterPage() {
 
                     <div className={styles.row}>
                       <div className={styles.formGroup}>
-                        <label className={styles.label}>Account Password *</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <label className={styles.label} style={{ margin: 0 }}>Account Password *</label>
+                          <button
+                            type="button"
+                            onClick={() => setShowOwnerPassword(!showOwnerPassword)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: 'var(--accent-gold, #b8860b)',
+                              fontSize: '0.75rem',
+                              cursor: 'pointer',
+                              padding: '0 0.25rem',
+                              fontWeight: 600,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
+                          >
+                            {showOwnerPassword ? 'Hide' : 'Show'}
+                          </button>
+                        </div>
                         <input
                           name="ownerPassword"
-                          type="password"
+                          type={showOwnerPassword ? 'text' : 'password'}
                           required
                           className={styles.input}
                           placeholder="Min 8 characters"
@@ -434,10 +711,30 @@ export default function BrandRegisterPage() {
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label className={styles.label}>Confirm Password *</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <label className={styles.label} style={{ margin: 0 }}>Confirm Password *</label>
+                          <button
+                            type="button"
+                            onClick={() => setShowOwnerConfirmPassword(!showOwnerConfirmPassword)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: 'var(--accent-gold, #b8860b)',
+                              fontSize: '0.75rem',
+                              cursor: 'pointer',
+                              padding: '0 0.25rem',
+                              fontWeight: 600,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
+                          >
+                            {showOwnerConfirmPassword ? 'Hide' : 'Show'}
+                          </button>
+                        </div>
                         <input
                           name="ownerConfirmPassword"
-                          type="password"
+                          type={showOwnerConfirmPassword ? 'text' : 'password'}
                           required
                           className={styles.input}
                           placeholder="Re-enter password"
@@ -588,25 +885,25 @@ export default function BrandRegisterPage() {
 
                   <div className={styles.row}>
                     <div className={styles.formGroup}>
-                      <label className={styles.label}>Brand Logo URL (Optional demo link)</label>
+                      <label className={styles.label}>TikTok Handle</label>
                       <input
-                        name="logoUrl"
-                        type="url"
+                        name="tiktokHandle"
+                        type="text"
                         className={styles.input}
-                        placeholder="https://..."
-                        value={formData.logoUrl}
+                        placeholder="@yourbrand or tiktok.com/@yourbrand"
+                        value={formData.tiktokHandle}
                         onChange={handleChange}
                       />
                     </div>
 
                     <div className={styles.formGroup}>
-                      <label className={styles.label}>Brand Banner URL (Optional demo link)</label>
+                      <label className={styles.label}>Facebook Handle / Page</label>
                       <input
-                        name="bannerUrl"
-                        type="url"
+                        name="facebookHandle"
+                        type="text"
                         className={styles.input}
-                        placeholder="https://..."
-                        value={formData.bannerUrl}
+                        placeholder="facebook.com/yourbrand or @yourbrand"
+                        value={formData.facebookHandle}
                         onChange={handleChange}
                       />
                     </div>
@@ -620,7 +917,7 @@ export default function BrandRegisterPage() {
               <div>
                 <h2 className={styles.sectionTitle}>Step 3: Business Verification & Compliance</h2>
                 <p className={styles.sectionSubtitle}>
-                  Provide corporate registration details or tax identification for your cosmetics enterprise.
+                  Provide corporate registration details and upload mandatory verification documents for compliance review.
                 </p>
 
                 <div className={styles.formGrid}>
@@ -638,11 +935,47 @@ export default function BrandRegisterPage() {
                     />
                   </div>
 
-                  <div className={styles.securityNotice} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {/* 1. Company Registration Document */}
+                  {renderFileUploader(
+                    '1. Company Registration Document (SECP / Incorporation Certificate / Form C)',
+                    'company_reg',
+                    companyRegDoc,
+                    setCompanyRegDoc,
+                    'PDF, JPG, or PNG up to 10MB'
+                  )}
+
+                  {/* 2. CNIC Front & Back */}
+                  <div className={styles.row}>
+                    {renderFileUploader(
+                      '2a. Owner CNIC / ID Card (Front Side)',
+                      'cnic_front',
+                      cnicFrontDoc,
+                      setCnicFrontDoc,
+                      'Clear photo of CNIC front side'
+                    )}
+                    {renderFileUploader(
+                      '2b. Owner CNIC / ID Card (Back Side)',
+                      'cnic_back',
+                      cnicBackDoc,
+                      setCnicBackDoc,
+                      'Clear photo of CNIC back side'
+                    )}
+                  </div>
+
+                  {/* 3. NTN Certificate */}
+                  {renderFileUploader(
+                    '3. NTN Certificate (FBR Tax Document)',
+                    'ntn_cert',
+                    ntnCertDoc,
+                    setNtnCertDoc,
+                    'National Tax Number certificate issued by FBR'
+                  )}
+
+                  <div className={styles.securityNotice} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '0.5rem' }}>
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span><strong>Verification Files:</strong> Once your initial application is submitted, you can upload CNIC, NTN Certificate, and Drug Regulatory Authority or cosmetic lab certifications directly through your Partner Portal.</span>
+                    <span><strong>Encrypted & Confidential:</strong> All identity and tax documents are stored securely and used strictly by Makaura Compliance to verify brand authenticity.</span>
                   </div>
                 </div>
               </div>
@@ -730,6 +1063,17 @@ export default function BrandRegisterPage() {
                       onChange={handleChange}
                     />
                   </div>
+
+                  {/* Cheque Leaf File Upload (Item 4) */}
+                  {renderFileUploader(
+                    'Cancelled Cheque / Bank Statement Leaf (Cheque Image)',
+                    'cheque_leaf',
+                    chequeLeafDoc,
+                    setChequeLeafDoc,
+                    'Upload cheque leaf photo in case account number is typed incorrectly — used by Makaura Finance to verify settlement details',
+                    'image/*,application/pdf',
+                    'banking'
+                  )}
                 </div>
               </div>
             )}
@@ -802,13 +1146,71 @@ export default function BrandRegisterPage() {
                         {formData.city}, {formData.country}
                       </span>
                     </div>
+                    {formData.instagramHandle && (
+                      <div className={styles.reviewItem}>
+                        <span className={styles.reviewItemLabel}>Instagram</span>
+                        <span className={styles.reviewItemVal}>{formData.instagramHandle}</span>
+                      </div>
+                    )}
+                    {formData.tiktokHandle && (
+                      <div className={styles.reviewItem}>
+                        <span className={styles.reviewItemLabel}>TikTok</span>
+                        <span className={styles.reviewItemVal}>{formData.tiktokHandle}</span>
+                      </div>
+                    )}
+                    {formData.facebookHandle && (
+                      <div className={styles.reviewItem}>
+                        <span className={styles.reviewItemLabel}>Facebook</span>
+                        <span className={styles.reviewItemVal}>{formData.facebookHandle}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Verification Documents Summary */}
+                <div className={styles.reviewCard}>
+                  <div className={styles.reviewHeader}>
+                    <span className={styles.reviewTitle}>3. Verification Documents</span>
+                    <button
+                      type="button"
+                      className={styles.reviewEditBtn}
+                      onClick={() => setCurrentStep(3)}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className={styles.reviewGrid}>
+                    <div className={styles.reviewItem}>
+                      <span className={styles.reviewItemLabel}>SECP / Company Reg</span>
+                      <span className={styles.reviewItemVal}>
+                        {companyRegDoc ? `✓ ${companyRegDoc.name}` : 'Not provided'}
+                      </span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <span className={styles.reviewItemLabel}>CNIC Front</span>
+                      <span className={styles.reviewItemVal}>
+                        {cnicFrontDoc ? `✓ ${cnicFrontDoc.name}` : 'Not provided'}
+                      </span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <span className={styles.reviewItemLabel}>CNIC Back</span>
+                      <span className={styles.reviewItemVal}>
+                        {cnicBackDoc ? `✓ ${cnicBackDoc.name}` : 'Not provided'}
+                      </span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <span className={styles.reviewItemLabel}>NTN Certificate</span>
+                      <span className={styles.reviewItemVal}>
+                        {ntnCertDoc ? `✓ ${ntnCertDoc.name}` : 'Not provided'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Banking Summary */}
                 <div className={styles.reviewCard}>
                   <div className={styles.reviewHeader}>
-                    <span className={styles.reviewTitle}>3. Banking & Settlement</span>
+                    <span className={styles.reviewTitle}>4. Banking & Settlement</span>
                     <button
                       type="button"
                       className={styles.reviewEditBtn}
@@ -831,6 +1233,12 @@ export default function BrandRegisterPage() {
                       <span className={styles.reviewItemVal}>
                         {'*'.repeat(Math.max(0, formData.accountNumber.length - 4))}
                         {formData.accountNumber.slice(-4)}
+                      </span>
+                    </div>
+                    <div className={styles.reviewItem}>
+                      <span className={styles.reviewItemLabel}>Cheque Leaf Image</span>
+                      <span className={styles.reviewItemVal}>
+                        {chequeLeafDoc ? `✓ ${chequeLeafDoc.name}` : 'Not attached'}
                       </span>
                     </div>
                   </div>

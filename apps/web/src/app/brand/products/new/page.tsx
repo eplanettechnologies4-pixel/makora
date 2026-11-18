@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../../../context/AuthContext';
@@ -9,6 +9,7 @@ import {
   getMyBrandProductsAction,
   saveBrandProductAction,
   getMyBrandCategoriesAction,
+  uploadBrandAssetAction,
 } from '../../../../lib/supabase/actions';
 import ShopifyShell from '../../../../components/brand/ShopifyShell';
 import styles from '../shopify-product.module.css';
@@ -38,6 +39,11 @@ function ProductFormContent() {
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [imageUrlInput, setImageUrlInput] = useState('');
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
+  const [uploadProgressText, setUploadProgressText] = useState<string | null>(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [price, setPrice] = useState('');
   const [compareAtPrice, setCompareAtPrice] = useState('');
   const [costPrice, setCostPrice] = useState('');
@@ -103,6 +109,92 @@ function ProductFormContent() {
 
   const handleRemoveImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
+  };
+
+  const handleSetPrimary = (index: number) => {
+    if (index === 0) return;
+    setImages((prev) => {
+      const selected = prev[index];
+      const remaining = prev.filter((_, i) => i !== index);
+      return [selected, ...remaining];
+    });
+  };
+
+  const handleMove = (index: number, direction: 'left' | 'right') => {
+    setImages((prev) => {
+      const copy = [...prev];
+      const targetIndex = direction === 'left' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= copy.length) return prev;
+      const temp = copy[index];
+      copy[index] = copy[targetIndex];
+      copy[targetIndex] = temp;
+      return copy;
+    });
+  };
+
+  const handleFilesSelected = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    if (fileArray.length === 0) {
+      alert('Please select valid image files (JPG, PNG, WEBP, etc.)');
+      return;
+    }
+
+    setIsUploadingFiles(true);
+    setUploadProgressText(`Uploading ${fileArray.length} image${fileArray.length > 1 ? 's' : ''} to CDN...`);
+
+    try {
+      const uploadPromises = fileArray.map(async (file) => {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('folder', 'products');
+        const res = await uploadBrandAssetAction(fd);
+        if (res.ok && res.data?.url) {
+          return res.data.url;
+        }
+        return null;
+      });
+
+      const results = await Promise.all(uploadPromises);
+      const validUrls = results.filter((u): u is string => Boolean(u));
+
+      if (validUrls.length > 0) {
+        setImages((prev) => [...prev, ...validUrls]);
+        setToastMessage(`Successfully uploaded ${validUrls.length} image${validUrls.length > 1 ? 's' : ''}`);
+        setTimeout(() => setToastMessage(null), 3500);
+      } else {
+        alert('Failed to upload images. Please check file sizes or connection.');
+      }
+    } catch (err: any) {
+      console.error('Multi-image upload error:', err);
+      alert('Error uploading images: ' + (err.message || 'Unknown error'));
+    } finally {
+      setIsUploadingFiles(false);
+      setUploadProgressText(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+    if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+      handleFilesSelected(e.dataTransfer.files);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -223,77 +315,220 @@ function ProductFormContent() {
 
           {/* Media / Gallery Card */}
           <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Media Gallery</h2>
-            <div className={styles.galleryZone}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <div>
+                <h2 className={styles.cardTitle} style={{ margin: 0 }}>Media Gallery</h2>
+                <p style={{ margin: '0.2rem 0 0', fontSize: '0.78rem', color: '#6d7175' }}>
+                  Upload product imagery (Shopify format). Select 10, 15, or more images at once. First image is the primary cover photo.
+                </p>
+              </div>
+              {images.length > 0 && (
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#008060', background: '#e3f1df', padding: '0.25rem 0.6rem', borderRadius: '12px' }}>
+                  {images.length} Image{images.length > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+
+            {/* Hidden multi-file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  handleFilesSelected(e.target.files);
+                }
+              }}
+            />
+
+            {/* Upload Zone / Dropzone */}
+            <div
+              className={`${styles.galleryZone} ${isDraggingOver ? styles.galleryZoneActive : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => {
+                if (!isUploadingFiles) {
+                  fileInputRef.current?.click();
+                }
+              }}
+            >
               <div className={styles.galleryPrompt}>
-                <svg width="28" height="28" viewBox="0 0 20 20" fill="#8c9196">
-                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={isDraggingOver ? '#008060' : '#8c9196'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
-                <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#202223' }}>
-                  Add images to your product gallery
+
+                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#202223' }}>
+                  {isUploadingFiles ? (
+                    <span style={{ color: '#008060' }}>{uploadProgressText || 'Uploading images...'}</span>
+                  ) : isDraggingOver ? (
+                    <span style={{ color: '#008060' }}>Drop your images here to upload</span>
+                  ) : (
+                    'Add files or drop photos here'
+                  )}
                 </div>
+
                 <div style={{ fontSize: '0.75rem', color: '#6d7175' }}>
-                  Paste image URL or choose from sample presets below
+                  Accepts JPG, PNG, WEBP. Select multiple files (e.g. 10 to 15+ photos) at once.
+                </div>
+
+                <div className={styles.uploadActionRow} onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    disabled={isUploadingFiles}
+                    className={styles.uploadMediaBtn}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>{isUploadingFiles ? 'Uploading...' : 'Select Images'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.toggleUrlBtn}
+                    onClick={() => setShowUrlInput(!showUrlInput)}
+                  >
+                    {showUrlInput ? 'Hide URL Input' : 'Add from URL / Presets'}
+                  </button>
                 </div>
               </div>
 
-              <div className={styles.galleryInputRow}>
-                <input
-                  type="url"
-                  className={styles.input}
-                  placeholder="https://images.unsplash.com/..."
-                  value={imageUrlInput}
-                  onChange={(e) => setImageUrlInput(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className={styles.btnSecondary}
-                  onClick={() => handleAddImage(imageUrlInput)}
-                >
-                  Add Image
-                </button>
-              </div>
+              {/* Collapsible URL Input & Sample Presets */}
+              {showUrlInput && (
+                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e1e3e5' }} onClick={(e) => e.stopPropagation()}>
+                  <div className={styles.galleryInputRow}>
+                    <input
+                      type="url"
+                      className={styles.input}
+                      placeholder="https://images.unsplash.com/..."
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className={styles.btnSecondary}
+                      onClick={() => handleAddImage(imageUrlInput)}
+                    >
+                      Add URL
+                    </button>
+                  </div>
 
-              {/* Sample Presets */}
-              <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center', marginTop: '0.75rem' }}>
-                <span style={{ fontSize: '0.7rem', color: '#6d7175', alignSelf: 'center' }}>Presets:</span>
-                {SAMPLE_MEDIA.slice(0, 4).map((url, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => handleAddImage(url)}
-                    style={{
-                      fontSize: '0.7rem',
-                      padding: '0.2rem 0.5rem',
-                      background: '#fff',
-                      border: '1px solid #c9cccf',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Image {i + 1}
-                  </button>
-                ))}
-              </div>
+                  <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.7rem', color: '#6d7175', alignSelf: 'center' }}>Quick Presets:</span>
+                    {SAMPLE_MEDIA.map((url, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleAddImage(url)}
+                        style={{
+                          fontSize: '0.7rem',
+                          padding: '0.2rem 0.5rem',
+                          background: '#fff',
+                          border: '1px solid #c9cccf',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Sample #{i + 1}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Gallery Image Grid */}
             {images.length > 0 && (
               <div className={styles.galleryGrid}>
                 {images.map((imgUrl, idx) => (
-                  <div key={idx} className={styles.imageItem}>
-                    <img src={imgUrl} alt={`Product ${idx}`} className={styles.imageThumb} />
-                    {idx === 0 && <span className={styles.primaryBadge}>Primary</span>}
+                  <div
+                    key={`${imgUrl}-${idx}`}
+                    className={`${styles.imageItem} ${idx === 0 ? styles.imageItemPrimary : ''}`}
+                  >
+                    <img src={imgUrl} alt={`Product ${idx + 1}`} className={styles.imageThumb} />
+
+                    {idx === 0 ? (
+                      <span className={styles.primaryBadge}>Primary Cover</span>
+                    ) : (
+                      <span className={styles.orderBadge}>#{idx + 1}</span>
+                    )}
+
                     <button
                       type="button"
                       className={styles.removeImageBtn}
-                      onClick={() => handleRemoveImage(idx)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveImage(idx);
+                      }}
                       title="Remove image"
                     >
                       ×
                     </button>
+
+                    <div className={styles.imageBottomActions}>
+                      {idx > 0 && (
+                        <button
+                          type="button"
+                          className={styles.makePrimaryBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSetPrimary(idx);
+                          }}
+                          title="Set as storefront primary cover photo"
+                        >
+                          Make Cover
+                        </button>
+                      )}
+                      <div style={{ display: 'flex', gap: '3px', marginLeft: 'auto' }}>
+                        {idx > 0 && (
+                          <button
+                            type="button"
+                            className={styles.reorderBtn}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMove(idx, 'left');
+                            }}
+                            title="Move left"
+                          >
+                            ‹
+                          </button>
+                        )}
+                        {idx < images.length - 1 && (
+                          <button
+                            type="button"
+                            className={styles.reorderBtn}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMove(idx, 'right');
+                            }}
+                            title="Move right"
+                          >
+                            ›
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ))}
+
+                {/* Add more tile in the grid */}
+                <div
+                  className={styles.addMoreTile}
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload more product photos"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>Add media</span>
+                </div>
               </div>
             )}
           </div>
